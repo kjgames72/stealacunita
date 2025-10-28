@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recinto 3D Estructurado - Campo Móvil</title>
+    
+<script src="https://cdn.tailwindcss.com"></script>
+    
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap');
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        #scene-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        canvas {
+            display: block;
+        }
+        /* UI Boxes */
+        .info-box {
+            position: absolute;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: #1f2937;
+            pointer-events: none;
+            max-width: 90%;
+        }
+        
+        /* Contenedor de Interacciones Izquierdo (Dinero y Botones) */
+        #left-interaction-area {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        
+        /* Botones de Interacción */
+        .action-button {
+            pointer-events: auto;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border: none;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        #buy-button {
+            background-color: #3b82f6; /* Azul */
+        }
+        #buy-button:active {
+            box-shadow: 0 2px #1e40af;
+            transform: translateY(2px);
+            background-color: #2563eb;
+        }
+        
+        #sell-button {
+            background-color: #f59e0b; /* Naranja */
+            display: none; /* Inicialmente oculto */
+        }
+        #sell-button:active {
+            box-shadow: 0 2px #b45309;
+            transform: translateY(2px);
+            background-color: #d97706;
+        }
+
+        /* Display de Dinero */
+        #money-display {
+            pointer-events: none;
+            background-color: #38a169;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        /* Controles de Movimiento (D-Pad) */
+        #mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            pointer-events: auto;
+        }
+        .control-button {
+            width: 70px; 
+            height: 70px; 
+            background-color: #4f46e5;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 4px #3730a3;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            user-select: none;
+            border: none;
+        }
+        .control-button:active {
+            box-shadow: 0 2px #3730a3;
+            transform: translateY(2px);
+            background-color: #6366f1;
+        }
+        #dpad-container {
+            display: grid;
+            grid-template-areas: ". forward ." "left . right" ". backward .";
+            gap: 5px;
+            width: 220px; 
+            height: 220px;
+        }
+        #btn-forward { grid-area: forward; }
+        #btn-left { grid-area: left; }
+        #btn-right { grid-area: right; }
+        #btn-backward { grid-area: backward; }
+
+        /* Botón de Interacción (Base) */
+        #interaction-button-base {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 30;
+            padding: 1rem 1.5rem;
+            background-color: #f59e0b; 
+            color: white;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: none; 
+            transition: background-color 0.1s;
+        }
+        #interaction-button-base:hover {
+            background-color: #d97706;
+        }
+    </style>
+    
+<style>
+        #purchase-ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 40;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            opacity: 0;
+            min-width: 200px;
+            max-width: 90%;
+            text-align: center;
+            border: 2px solid #3b82f6;
+        }
+        #purchase-text {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+        #purchase-progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #d1d5db;
+        }
+        #purchase-progress {
+            height: 100%;
+            background-color: #10b981;
+            transition: width 0.05s linear; 
+        }
+        #purchase-tip {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            color: #6b7280;
+        }
+    </style>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+
+    <div id="scene-container">
+        
+<div class="info-box"></div>
+
+        
+<div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
+            <div class="text-white p-4 rounded-lg bg-indigo-600 shadow-xl">Cargando escena y autenticación...</div>
+        </div>
+        
+        
+<div id="purchase-ui">
+            <div id="purchase-text"></div>
+            <div id="purchase-progress-container">
+                <div id="purchase-progress" style="width: 0%;"></div>
+            </div>
+            <div id="purchase-tip"></div>
+        </div>
+
+        
+<div id="left-interaction-area">
+            <button id="buy-button" class="action-button" disabled>Apunta para Comprar</button>
+            <button id="sell-button" class="action-button" disabled>Vender Cápsula</button>
+            <div id="money-display">$100</div>
+        </div>
+
+        
+<div id="mobile-controls">
+            <div id="dpad-container">
+                <button id="btn-forward" class="control-button">W/↑</button>
+                <button id="btn-left" class="control-button">A/←</button>
+                <button id="btn-right" class="control-button">D/→</button>
+                <button id="btn-backward" class="control-button">S/↓</button>
+            </div>
+        </div>
+
+        
+<button id="interaction-button-base">Cerrar Base</button>
+    </div>
+
+    <script type="module">
+        // =========================================================
+        // 1. CONSTANTES GLOBALES Y ESTADO (THREE.JS & GAME)
+        // =========================================================
+        const container = document.getElementById('scene-container');
+        const moneyDisplay = document.getElementById('money-display');
+        const buyButton = document.getElementById('buy-button'); 
+        const sellButton = document.getElementById('sell-button'); // Nuevo botón de venta
+        const interactionButtonBase = document.getElementById('interaction-button-base');
+        const purchaseUI = document.getElementById('purchase-ui');
+        const purchaseProgress = document.getElementById('purchase-progress');
+        const purchaseText = document.getElementById('purchase-text');
+        const purchaseTip = document.getElementById('purchase-tip');
+
+        // Estado del Juego
+        let currentMoney = 100;
+        let playerDps = 0;
+        const BASE_ID = 'base_1_left'; 
+        const capsuleBuyRange = 10;
+        const buyDuration = 0.2; // Duración para compra/venta instantánea
+        
+        // Temporizadores de Aparición Garantizada (Pity Timer)
+        const LEGENDARY_GUARANTEE_TIME = 4 * 60; 
+        const MYTHIC_GUARANTEE_TIME = 14 * 60; 
+        let legendaryTimer = 0; 
+        let mythicTimer = 0;
+        let timerTexture = null; 
+        let timerCanvas = null; 
+        let timerContext = null; 
+
+        // Inventario y Base del Jugador
+        let playerBasePosition = new THREE.Vector3(); 
+        let baseInventory = []; 
+        const BASE_SLOT_OFFSETS = [
+            { x: -3.5, z: -3.5 }, { x: 3.5, z: -3.5 }, 
+            { x: -3.5, z: 0 },    { x: 3.5, z: 0 },    
+            { x: -3.5, z: 3.5 },  { x: 3.5, z: 3.5 }   
+        ]; 
+
+        // Estado de Three.js
+        let scene, camera, renderer, raycaster, controls; 
+        let prevTime = performance.now();
+        let lastTimerUpdate = 0; 
+        let font = null; 
+        let gltfLoader;
+        const loadedModels = {}; // Caché para los modelos cargados
+        const capsules = []; 
+        let doorMesh;
+        let isDoorOpen = true; 
+
+        // NUEVO: Estado de las Bases (Láseres y Botones)
+        const BASE_IDS = [];
+        const baseLaserGrids = {};
+        const baseLaserBounds = {};
+        const baseButtons = {};
+        let lastBaseCheck = 0;
+
+        // Estado de Movimiento
+        let moveState = { forward: false, backward: false, left: false, right: false };
+        let velocity = new THREE.Vector3();
+        const movementSpeed = 0.005; 
+        const playerHeight = 1.8;
+        const playerRadius = 1;
+
+        // Estado de Interacción (Compra/Venta)
+        let isBuying = false; 
+        let isSelling = false; // Nuevo estado de venta
+        let buyProgress = 0; 
+        let targetCapsule = null; // Cápsula que se va a comprar
+        let targetPlacedCapsule = null; // Cápsula colocada que se va a vender
+
+
+        // Propiedades de la Escena 
+        const sceneProps = {
+            groundWidth: 100, 
+            groundDepth: 80,
+            wallHeight: 15,
+            wallThickness: 1,
+            centralCarpetWidth: 12,
+            structureCubeSize: 12, 
+            baseRadius: 10,
+            capsuleSpeed: 2,
+            capsuleRadius: 0.5,
+            capsuleHeight: 2,
+            capsuleStartPos: { x: 0, y: 0.5 + 2/2, z: -35 }, 
+            capsuleEndPos: { x: 0, y: 0.5 + 2/2, z: 35 },
+            capsuleSpawnInterval: 3000, 
+            lastCapsuleTime: 0,
+            capsuleLabelOffset: { y: 1.5, z: -0.01 } 
+        };
+
+        // Arrays de Colisión
+        let structureBounds = []; 
+        let staticStructureBounds = []; 
+        let permanentCasetaBounds = []; 
+        let doorBounds = null; 
+        let holeBounds = []; 
+
+        // =========================================================
+        // 2. CONFIGURACIÓN DE FIREBASE 
+        // =========================================================
+        // MODIFICADO: 'appId' ahora es un valor estático para pruebas locales.
+        // Puedes cambiar 'default-local-app-id' por el tuyo si es necesario.
+        const appId = 'default-local-app-id';
+        
+        // MODIFICADO: Parseo de firebaseConfig más robusto
+        // ¡¡¡IMPORTANTE!!!
+        // Configuración de Firebase proporcionada por el usuario.
+        let firebaseConfig = {
+            apiKey: "AIzaSyC-3QWjxrG2EY4BO3i6NXBG_swPnGnMs5Y",
+            authDomain: "idkkkkkkkkkkkkkkkk-c0ed0.firebaseapp.com",
+            projectId: "idkkkkkkkkkkkkkkkk-c0ed0",
+            storageBucket: "idkkkkkkkkkkkkkkkk-c0ed0.firebasestorage.app",
+            messagingSenderId: "66190789281",
+            appId: "1:66190789281:web:dce318b1d88e6398b33ee0",
+            measurementId: "G-37FPTD4MMV"
+        };
+        // La lógica original que parseaba __firebase_config (que no existe localmente) se ha eliminado.
+
+
+        // MODIFICADO: Comprobación de initialAuthToken más robusta
+        // La variable 'initialAuthToken' (basada en __initial_auth_token) se ha eliminado
+        // ya que no está disponible en un entorno local.
+        // const initialAuthToken = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) ? __initial_auth_token : null; // ELIMINADO
+
+        let db, auth, userId;
+        let initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged;
+        let getFirestore, doc, setDoc, onSnapshot, serverTimestamp, Timestamp;
+
+        // =========================================================
+        // 3. DATOS Y AYUDAS DE FORMATO (PERSONAJES Y MATEMÁTICAS)
+        // =========================================================
+        
+        const RARITY_PROBABILITIES = { "Comun": 55.0, "Raro": 30.0, "Epico": 10.0, "Legendario": 4.0, "Mitico": 0.8, "God": 0.1, "Secreto": 0.1 };
+        const CHARACTER_WEIGHTS = { "Retolam": 0.5, "Shrek": 0.3, "Chuck Norris": 0.2, "Obamium": 1.0 };
+        const CHARACTER_DATA = [
+            { name: "Shrek", cost: 10000000000, dps: 50000000, rarity: "Secreto", modelFile: "shrek.glb" }, 
+            { name: "CR7", cost: 225000, dps: 900, rarity: "Legendario", modelFile: "CR7.glb" },
+            { name: "Mordecai", cost: 10000, dps: 75, rarity: "Epico", modelFile: "mordecai.glb" }, 
+            { name: "Obamium", cost: 435000000, dps: 235000, rarity: "God", modelFile: "obamium.glb" },
+            { name: "Tails", cost: 25000, dps: 250, rarity: "Legendario", modelFile: "tails.glb" }, 
+            { name: "Limpin", cost: 700, dps: 7, rarity: "Comun", modelFile: "limpin.glb" },
+            { name: "Invincible", cost: 8500000, dps: 8700, rarity: "Mitico", modelFile: "invincible.glb" }, 
+            { name: "Hamood", cost: 5000, dps: 40, rarity: "Raro", modelFile: "hamood.glb" },
+            { name: "Doctor House", cost: 7500, dps: 55, rarity: "Raro", modelFile: "doctor house.glb" }, 
+            { name: "Retolam", cost: 1000000000, dps: 10000000, rarity: "Secreto", modelFile: "retolam.glb" },
+            { name: "Comelon", cost: 1200, dps: 10, rarity: "Comun", modelFile: "comelon.glb" }, 
+            { name: "Wizy", cost: 4000, dps: 30, rarity: "Raro", modelFile: "wizy.glb" },
+            { name: "Chuck Norris", cost: 100000000000, dps: 200000000, rarity: "Secreto", modelFile: "chuck norris.glb" }, 
+            { name: "Baby Matt", cost: 25, dps: 1, rarity: "Comun", modelFile: "baby matt.glb" }, 
+            { name: "Chillin Chili", cost: 4800000, dps: 16200, rarity: "Mitico", modelFile: "chillin chili.glb" }, 
+            { name: "Lorenzo", cost: 500, dps: 5, rarity: "Comun", modelFile: "lorenzo.glb" },
+            { name: "Baby Goblin", cost: 250, dps: 3, rarity: "Comun", modelFile: "baby goblin.glb" }
+        ];
+
+        const CHARACTERS_BY_RARITY = {};
+        const TOTAL_WEIGHTS_BY_RARITY = {};
+        
+        // Pre-cálculo de pesos y rareza
+        CHARACTER_DATA.forEach(char => {
+            const rarity = char.rarity;
+            if (!CHARACTERS_BY_RARITY[rarity]) {
+                CHARACTERS_BY_RARITY[rarity] = [];
+                TOTAL_WEIGHTS_BY_RARITY[rarity] = 0;
+            }
+            const weight = CHARACTER_WEIGHTS[char.name] || 1.0; 
+            const charWithWeight = { ...char, weight };
+            CHARACTERS_BY_RARITY[rarity].push(charWithWeight);
+            TOTAL_WEIGHTS_BY_RARITY[rarity] += weight;
+        });
+
+        function formatLargeNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(1) + ' Billones';
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + ' Mil Millones';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + ' Millones';
+            if (num >= 1e3) return (num / 1e3).toFixed(0) + 'K';
+            return num.toFixed(0);
+        }
+        
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            const displayMinutes = String(minutes).padStart(2, '0');
+            const displaySeconds = String(seconds).padStart(2, '0');
+            return `${displayMinutes}:${displaySeconds}`;
+        }
+        
+        function getRarityColor(rarity) {
+            switch (rarity) {
+                case 'Comun': return 0xffffff; 
+                case 'Raro': return 0x3b82f6; 
+                case 'Epico': return 0x9333ea; 
+                case 'Legendario': return 0xfacc15; 
+                case 'God': return 0xff0000; 
+                case 'Secreto': return 0x9ca3af; 
+                default: return 0xef4444; 
+            }
+        }
+        
+        function selectCharacter(forcedRarity = null) {
+            let selectedRarity = forcedRarity;
+            
+            if (!selectedRarity) {
+                let randomRarityRoll = Math.random() * 100;
+                let cumulativeProbability = 0;
+                selectedRarity = 'Comun';
+
+                for (const rarity in RARITY_PROBABILITIES) {
+                    cumulativeProbability += RARITY_PROBABILITIES[rarity];
+                    if (randomRarityRoll <= cumulativeProbability) {
+                        selectedRarity = rarity;
+                        break;
+                    }
+                }
+            }
+
+            const characterPool = CHARACTERS_BY_RARITY[selectedRarity];
+            const totalWeight = TOTAL_WEIGHTS_BY_RARITY[selectedRarity];
+            
+            if (!characterPool || characterPool.length === 0 || totalWeight === 0) {
+                 console.warn(`Pool for rarity ${selectedRarity} is empty. Falling back to Comun.`);
+                 return CHARACTERS_BY_RARITY['Comun'][0];
+            }
+            
+            let randomCharacterRoll = Math.random() * totalWeight;
+            let cumulativeWeight = 0;
+            let selectedCharacter = characterPool[0];
+
+            for (const char of characterPool) {
+                cumulativeWeight += char.weight;
+                if (randomCharacterRoll <= cumulativeWeight) {
+                    selectedCharacter = char;
+                    break;
+                }
+            }
+            
+            return selectedCharacter;
+        }
+
+        // =========================================================
+        // 2. FUNCIONES DE FIREBASE / ESTADO DEL JUGADOR
+        // =========================================================
+
+        function updateMoneyDisplay() {
+            moneyDisplay.innerHTML = `\$${formatLargeNumber(currentMoney)}<div style="font-size:0.8rem; opacity:0.8; margin-top:2px;">+${formatLargeNumber(playerDps)}/s</div>`;
+        }
+        
+        function passiveMoneyGain(delta) {
+            if (playerDps > 0) {
+                currentMoney += playerDps * delta;
+                updateMoneyDisplay();
+            }
+        }
+
+        async function saveMoneyState() {
+            if (!userId || !db) return;
+            const moneyRef = doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'money_state');
+            try {
+                await setDoc(moneyRef, { balance: currentMoney }, { merge: true });
+            } catch (error) {
+                console.error("Error al guardar el dinero:", error);
+            }
+        }
+
+        function setupMoneyListener() {
+            if (!db || !userId) return;
+            const moneyRef = doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'money_state');
+            onSnapshot(moneyRef, (docSnap) => {
+                if (docSnap.exists() && typeof docSnap.data().balance === 'number') {
+                    currentMoney = docSnap.data().balance;
+                    updateMoneyDisplay();
+                } else {
+                    saveMoneyState();
+                }
+            }, (error) => {
+                console.error("Error al escuchar el estado del dinero:", error);
+            });
+        }
+        
+        function getDpsDocRef() {
+            return doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'dps_state');
+        }
+
+        async function updatePlayerDps(dpsChange) {
+            playerDps += dpsChange;
+            try {
+                await setDoc(getDpsDocRef(), { dps: playerDps }, { merge: true });
+            } catch (error) {
+                console.error("Error al actualizar DPS:", error);
+            }
+        }
+        
+        function setupDpsListener() {
+            if (!db || !userId) return;
+            onSnapshot(getDpsDocRef(), (docSnap) => {
+                if (docSnap.exists() && typeof docSnap.data().dps === 'number') {
+                    playerDps = docSnap.data().dps;
+                    updateMoneyDisplay();
+                } else {
+                    setDoc(getDpsDocRef(), { dps: 0 }, { merge: true });
+                }
+            }, (error) => {
+                console.error("Error al escuchar el estado de DPS:", error);
+            });
+        }
+        
+        function getTimerDocRef() {
+            return doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'guarantee_timers');
+        }
+
+        async function saveTimersState() {
+            if (!userId || !db) return;
+            try {
+                await setDoc(getTimerDocRef(), { 
+                    legendaryTimer: legendaryTimer,
+                    mythicTimer: mythicTimer,
+                }, { merge: true });
+            } catch (error) {
+                console.error("Error al guardar los temporizadores:", error);
+            }
+        }
+
+        function setupTimerListener() {
+            if (!db || !userId) return;
+            onSnapshot(getTimerDocRef(), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    legendaryTimer = data.legendaryTimer || 0;
+                    mythicTimer = data.mythicTimer || 0;
+                } else {
+                    saveTimersState();
+                }
+            }, (error) => {
+                console.error("Error al escuchar los temporizadores:", error);
+            });
+        }
+
+        // --- INVENTARIO DE BASE ---
+        function getInventoryDocRef() {
+            return doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'base_inventory');
+        }
+        
+        async function saveBaseInventory() {
+            if (!userId || !db) return;
+            try {
+                // Almacenar solo los datos esenciales de los slots
+                const serializableInventory = baseInventory.map(slot => ({
+                    occupied: slot.occupied,
+                    capsuleData: slot.capsuleData
+                }));
+                await setDoc(getInventoryDocRef(), { slots: serializableInventory }, { merge: true });
+            } catch (error) {
+                console.error("Error al guardar el inventario de la base:", error);
+            }
+        }
+
+        function setupInventoryListener() {
+            if (!db || !userId) return;
+            onSnapshot(getInventoryDocRef(), (docSnap) => {
+                if (docSnap.exists()) {
+                    const savedSlots = docSnap.data().slots || [];
+                    
+                    // Limpiar cápsulas 3D existentes para evitar duplicados y reflejar el estado actual
+                    for (let i = capsules.length - 1; i >= 0; i--) {
+                        if (capsules[i].userData.isPlaced) {
+                            scene.remove(capsules[i]);
+                            capsules.splice(i, 1);
+                        }
+                    }
+
+                    // Restaurar los datos guardados en la estructura baseInventory
+                    savedSlots.forEach((savedSlot, index) => {
+                        if (index < baseInventory.length) {
+                            baseInventory[index].occupied = savedSlot.occupied;
+                            baseInventory[index].capsuleData = savedSlot.capsuleData;
+                            
+                            // Si está ocupado, renderizar la cápsula en 3D
+                            if (savedSlot.occupied && savedSlot.capsuleData) {
+                                // Crear y colocar la cápsula estática
+                                const slotPos = baseInventory[index].position;
+                                const capsuleMesh = createStaticCapsule(savedSlot.capsuleData);
+                                capsuleMesh.position.copy(slotPos);
+                                capsuleMesh.userData.isPlaced = true;
+                                capsuleMesh.userData.baseSlotIndex = index;
+                                scene.add(capsuleMesh);
+                                capsules.push(capsuleMesh);
+                            }
+                        }
+                    });
+                } else {
+                    saveBaseInventory();
+                }
+            }, (error) => {
+                console.error("Error al escuchar el inventario:", error);
+            });
+        }
+
+
+        async function setupFirebase() {
+            try {
+                // Importaciones dinámicas de Firebase (actualizadas a v12.4.0)
+                const fb = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js");
+                const analyticsMod = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js"); // Añadido por el usuario
+                const authMod = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js");
+                const fsMod = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js");
+                
+                initializeApp = fb.initializeApp;
+                const getAnalytics = analyticsMod.getAnalytics; // Añadido por el usuario
+                
+                // Funciones de Auth
+                getAuth = authMod.getAuth;
+                signInAnonymously = authMod.signInAnonymously;
+                signInWithCustomToken = authMod.signInWithCustomToken; // Se mantiene, aunque la lógica local no la use
+                onAuthStateChanged = authMod.onAuthStateChanged;
+                
+                // Funciones de Firestore
+                getFirestore = fsMod.getFirestore;
+                doc = fsMod.doc;
+                setDoc = fsMod.setDoc;
+                onSnapshot = fsMod.onSnapshot;
+                serverTimestamp = fsMod.serverTimestamp; 
+                Timestamp = fsMod.Timestamp; 
+
+                fsMod.setLogLevel('Debug');
+                
+                const app = initializeApp(firebaseConfig);
+                const analytics = getAnalytics(app); // Añadido por el usuario
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                const MAX_RETRIES = 5;
+                let delay = 1000; 
+                let successfulAuth = false;
+
+                for (let i = 0; i < MAX_RETRIES; i++) {
+                    try {
+                        // MODIFICADO: Se eliminó la lógica de 'signInWithCustomToken'
+                        // ya que '__initial_auth_token' no está disponible localmente.
+                        // Siempre usaremos 'signInAnonymously' para pruebas locales.
+                        console.log("Intentando signInAnonymously (para pruebas locales)...");
+                        await signInAnonymously(auth);
+                        
+                        successfulAuth = true;
+                        console.log("Autenticación anónima exitosa.");
+                        break; 
+                    } catch (error) {
+                        // MODIFICADO: Manejo de error más específico
+                        console.warn(`Intento de autenticación ${i + 1} fallido:`, error.message);
+                        
+                        if (error.code === 'auth/configuration-not-found') {
+                             console.error("Error crítico: 'auth/configuration-not-found'.");
+                             // Este error es fatal y no se resolverá reintentando.
+                             // Lanza el error para ser capturado por el catch principal.
+                             throw error; 
+                        }
+
+                        if (i === MAX_RETRIES - 1) {
+                            console.error("Autenticación fallida después de todos los reintentos.");
+                            throw error; // Lanza el error para ser capturado por el catch principal
+                        }
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; 
+                    }
+                }
+                
+                if (!successfulAuth) {
+                     // Esta línea es técnicamente redundante ahora porque el bucle lanzará un error, pero la dejamos por claridad.
+                     throw new Error("Autenticación fallida después de múltiples reintentos.");
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) { userId = user.uid; } else { userId = 'anon-' + crypto.randomUUID(); }
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    loadAllAssets().then(() => { 
+                        init3DScene();
+                        setupBaseStateListeners(); // Renombrada de setupDoorListener
+                        setupMoneyListener(); 
+                        setupDpsListener(); 
+                        setupTimerListener(); 
+                        setupInventoryListener(); 
+                        animate();
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error al configurar Firebase:", error);
+                
+                // MODIFICADO: Mensaje de error mejorado para el usuario
+                let userErrorMessage = "Error al cargar el servicio de autenticación. Consulta la consola.";
+                if (error.code === 'auth/configuration-not-found') {
+                    userErrorMessage = `
+                        <div class="text-white p-4 rounded-lg bg-red-600 shadow-xl text-left">
+                            <h3 class="font-bold text-lg mb-2">Error de Configuración de Firebase</h3>
+                            <p class="text-sm"><strong>Error:</strong> (auth/configuration-not-found)</p>
+                            <p class="text-sm mt-2"><strong>Solución:</strong> Este error significa que la "Autenticación Anónima" no está habilitada en tu proyecto de Firebase.</p>
+                            <ul class="list-disc list-inside text-sm mt-1 pl-2">
+                                <li>Ve a la Consola de Firebase.</li>
+                                <li>Abre tu proyecto (idkkkkkkkkkkkkkkkk-c0ed0).</li>
+                                <li>Ve a <strong>Authentication</strong> > <strong>Sign-in method</strong>.</li>
+                                <li>Haz clic en <strong>"Anónimo"</strong> y actívalo.</li>
+                                <li>Recarga esta página.</li>
+                            </ul>
+                        </div>
+                    `;
+                }
+                document.getElementById('loading').innerHTML = userErrorMessage;
+            }
+        }
+        
+        // =========================================================
+        // 5. LÓGICA DE LA PUERTA (Base)
+        // =========================================================
+
+        function getBaseDocRef(baseId) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'base_state', baseId);
+        }
+
+        // --- MANEJO DEL BOTÓN DE LA BASE ---
+        async function handleBaseButtonPress(baseId) {
+            if (!userId || !db || !Timestamp) return;
+
+            const laserGrid = baseLaserGrids[baseId];
+            if (!laserGrid || laserGrid.userData.isClosed) return; // Ya está cerrada o no existe
+
+            // Optimista: cerrar visualmente
+            const now = Timestamp.now();
+            const reOpenTime = new Timestamp(now.seconds + 60, now.nanoseconds);
+            setLaserGridVisualState(baseId, true, userId, reOpenTime);
+
+            try {
+                await setDoc(getBaseDocRef(baseId), { 
+                    isClosed: true, 
+                    closedByUserId: userId, 
+                    reOpenTime: reOpenTime 
+                }, { merge: true });
+            } catch (error) {
+                console.error("Error al cerrar la base:", error);
+                // Revertir si falla Firestore
+                setLaserGridVisualState(baseId, false, null, null);
+            }
+        }
+
+        // --- LISTENER PARA TODAS LAS BASES ---
+        function setupBaseStateListeners() {
+            if (!db || BASE_IDS.length === 0) {
+                 console.warn("setupBaseStateListeners llamado antes de que BASE_IDS esté poblado o db inicializado.");
+                 setTimeout(setupBaseStateListeners, 1000); // Reintentar
+                 return;
+            }
+            
+            BASE_IDS.forEach(baseId => {
+                onSnapshot(getBaseDocRef(baseId), (docSnap) => {
+                    let isClosed = false, closedByUserId = null, reOpenTime = null;
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        isClosed = data.isClosed || false;
+                        closedByUserId = data.closedByUserId || null;
+                        reOpenTime = data.reOpenTime || null;
+                        
+                        // Lógica de reapertura automática del lado del cliente (como respaldo)
+                        if (isClosed && reOpenTime && Timestamp.now().seconds >= reOpenTime.seconds) {
+                            isClosed = false;
+                            closedByUserId = null;
+                            reOpenTime = null;
+                            
+                            // Opcional: El cliente que lo detecta lo resetea
+                            // Esto puede causar escrituras concurrentes, pero es auto-corregible.
+                             if (userId === data.closedByUserId) { // Solo el que la cerró la resetea
+                                 (async () => {
+                                     try {
+                                        await setDoc(getBaseDocRef(baseId), { isClosed: false, closedByUserId: null, reOpenTime: null }, { merge: true });
+                                     } catch (e) {}
+                                 })();
+                             }
+                        }
+
+                    } else {
+                        // Crear estado inicial si no existe
+                        (async () => {
+                             try {
+                                await setDoc(getBaseDocRef(baseId), { isClosed: false, closedByUserId: null, reOpenTime: null }, { merge: true });
+                             } catch(e) {}
+                        })();
+                    }
+                    
+                    // Actualizar la escena 3D
+                    setLaserGridVisualState(baseId, isClosed, closedByUserId, reOpenTime);
+
+                }, (error) => {
+                    console.error(`Error al escuchar la base ${baseId}:`, error);
+                });
+            });
+        }
+        
+        // --- ACTUALIZACIÓN VISUAL ---
+        function setLaserGridVisualState(baseId, isClosed, closedByUserId, reOpenTime) {
+            const laserGrid = baseLaserGrids[baseId];
+            if (!laserGrid) return;
+
+            laserGrid.visible = isClosed;
+            laserGrid.userData.isClosed = isClosed;
+            laserGrid.userData.closedByUserId = closedByUserId;
+            laserGrid.userData.reOpenTime = reOpenTime; // Timestamp de Firestore
+            laserGrid.userData.isReopening = false; // Flag para auto-reapertura
+
+            updateStructureBounds(); // Recalcular colisiones
+        }
+        
+        // =========================================================
+        // 6. THREE.JS: SETUP Y GEOMETRÍA
+        // =========================================================
+        
+        function registerCollisionBounds(mesh, width, height, depth, isPermanent = false, type = 'Caseta') {
+            const x = mesh.position.x;
+            const y = mesh.position.y;
+            const z = mesh.position.z;
+
+            const bound = {
+                minX: x - width / 2, maxX: x + width / 2,
+                minZ: z - depth / 2, maxZ: z + depth / 2,
+                minY: y - height / 2, maxY: y + height / 2,
+            };
+
+            if (isPermanent) {
+                if (type === 'Wall') {
+                    staticStructureBounds.push(bound);
+                } else {
+                    permanentCasetaBounds.push(bound);
+                }
+            }
+            return bound;
+        }
+
+        function updateStructureBounds() {
+            structureBounds = [];
+            staticStructureBounds.forEach(bound => structureBounds.push(bound));
+            permanentCasetaBounds.forEach(bound => structureBounds.push(bound));
+
+            // AÑADIR LÁSERES ACTIVOS A LAS COLISIONES
+            for (const baseId of BASE_IDS) {
+                const laserGrid = baseLaserGrids[baseId];
+                const laserBound = baseLaserBounds[baseId];
+
+                if (laserGrid && laserBound && laserGrid.userData.isClosed) {
+                    // ¡IMPORTANTE! Solo añadir colisión si NO eres el jugador que la cerró
+                    if (laserGrid.userData.closedByUserId !== userId) {
+                        structureBounds.push(laserBound);
+                    }
+                }
+            }
+        }
+        
+        // --- Canvas para Textura 3D del Temporizador ---
+        function drawTimerCanvas() {
+            if (!timerCanvas || !timerContext) return;
+            
+            const canvasWidth = timerCanvas.width;
+            const canvasHeight = timerCanvas.height;
+            timerContext.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Fondo y Borde... (misma lógica que antes)
+            timerContext.fillStyle = '#1f2937'; 
+            timerContext.fillRect(0, 0, canvasWidth, canvasHeight);
+            timerContext.strokeStyle = '#6b7280';
+            timerContext.lineWidth = 4;
+            timerContext.strokeRect(0, 0, canvasWidth, canvasHeight);
+            timerContext.fillStyle = '#10b981';
+            timerContext.font = `bold ${canvasHeight * 0.1}px Inter`;
+            timerContext.textAlign = 'center';
+            timerContext.textBaseline = 'top';
+            timerContext.fillText('PITY TIMER', canvasWidth / 2, canvasHeight * 0.05);
+            timerContext.strokeStyle = '#4b5563';
+            timerContext.lineWidth = 2;
+            timerContext.beginPath();
+            timerContext.moveTo(canvasWidth * 0.1, canvasHeight * 0.45);
+            timerContext.lineTo(canvasWidth * 0.9, canvasHeight * 0.45);
+            timerContext.stroke();
+
+            function drawTimerRow(y, label, timer, maxTime, color) {
+                const remaining = maxTime - timer;
+                const timeText = remaining <= 0 ? '¡LISTO!' : formatTime(remaining);
+                const timeColor = remaining <= 0 ? '#10b981' : color;
+                timerContext.fillStyle = color;
+                timerContext.font = `bold ${canvasHeight * 0.08}px Inter`;
+                timerContext.textAlign = 'left';
+                timerContext.fillText(label, canvasWidth * 0.1, y);
+                timerContext.fillStyle = timeColor;
+                timerContext.font = `bold ${canvasHeight * 0.1}px Inter`;
+                timerContext.textAlign = 'right';
+                timerContext.fillText(timeText, canvasWidth * 0.9, y);
+            }
+
+            drawTimerRow(canvasHeight * 0.25, 'Legendario:', legendaryTimer, LEGENDARY_GUARANTEE_TIME, '#facc15');
+            drawTimerRow(canvasHeight * 0.55, 'Mítico:', mythicTimer, MYTHIC_GUARANTEE_TIME, '#ef4444');
+            
+            timerTexture.needsUpdate = true;
+            lastTimerUpdate = Date.now();
+        }
+
+        function loadFont() {
+            return new Promise((resolve, reject) => {
+                const loader = new THREE.FontLoader();
+                loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+                    (loadedFont) => {
+                        font = loadedFont;
+                        resolve();
+                    },
+                    (xhr) => {
+                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                    },
+                    (err) => {
+                        console.error('An error happened loading the font:', err);
+                        reject(err);
+                    }
+                );
+            });
+        }
+
+        function loadModels() {
+            gltfLoader = new THREE.GLTFLoader();
+            const modelPromises = [];
+
+            CHARACTER_DATA.forEach(char => {
+                if (char.modelFile) {
+                    const promise = new Promise((resolve, reject) => {
+                        gltfLoader.load(char.modelFile, (gltf) => {
+                            loadedModels[char.name] = gltf.scene;
+                            console.log(`Modelo cargado: ${char.name}`);
+                            resolve();
+                        }, undefined, (error) => {
+                            console.error(`Error cargando modelo ${char.modelFile}:`, error);
+                            resolve(); // Resolvemos igualmente para no bloquear la carga
+                        });
+                    });
+                    modelPromises.push(promise);
+                }
+            });
+            
+            // Usamos Promise.allSettled para que un modelo fallido no detenga toda la carga
+            return Promise.allSettled(modelPromises);
+        }
+
+        async function loadAllAssets() {
+            // Cargamos fuente y modelos en paralelo
+            await Promise.all([
+                loadFont(),
+                loadModels()
+            ]);
+            console.log("Todos los assets cargados (fuente y modelos).");
+        }
+
+
+        function init3DScene() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xdce7f0); 
+            scene.fog = new THREE.Fog(0xdce7f0, 0, 150);
+
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, playerHeight, 0); 
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+            container.appendChild(renderer.domElement);
+            
+            raycaster = new THREE.Raycaster();
+
+            // --- Materiales ---
+            const brickMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); 
+            const carpetMaterial = new THREE.MeshPhongMaterial({ color: 0xc9302c, shininess: 50 }); 
+            const groundMaterial = new THREE.MeshPhongMaterial({ color: 0x5cb85c }); 
+            const holeMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 }); 
+            const simpleCubeMaterial = new THREE.MeshPhongMaterial({ color: 0x607d8b, transparent: true, opacity: 0.5, side: THREE.DoubleSide }); 
+            const doorMaterial = new THREE.MeshPhongMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.5, side: THREE.DoubleSide }); 
+            
+            // --- Inicialización del Pity Timer Monitor ---
+            timerCanvas = document.createElement('canvas');
+            timerCanvas.width = 512; timerCanvas.height = 512; 
+            timerContext = timerCanvas.getContext('2d');
+            timerTexture = new THREE.CanvasTexture(timerCanvas);
+            const monitorFrontMaterial = new THREE.MeshBasicMaterial({ map: timerTexture }); 
+            const monitorSideMaterial = new THREE.MeshPhongMaterial({ color: 0x111111 });
+            drawTimerCanvas(); 
+
+            function createSegment(width, height, depth, x, y, z, material, registerCollision = false, type = 'Caseta') {
+                const geometry = new THREE.BoxGeometry(width, height, depth);
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(x, y, z);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                mesh.userData.type = type;
+                scene.add(mesh);
+                if (registerCollision) {
+                    registerCollisionBounds(mesh, width, height, depth, true, type);
+                }
+                return mesh;
+            }
+
+            // --- Terreno y Marco Perimetral ---
+            const { groundWidth, groundDepth, wallHeight, wallThickness, centralCarpetWidth, structureCubeSize } = sceneProps;
+            const halfGW = groundWidth / 2 + wallThickness / 2;
+            const halfGD = groundDepth / 2 + wallThickness / 2;
+            const halfWH = wallHeight / 2;
+            const entranceWidth = 12; 
+            const sideWallWidth = (groundWidth - entranceWidth) / 2; 
+            const entranceGapOffset = sideWallWidth / 2 + entranceWidth / 2; 
+            const carpetThickness = 0.1; 
+            
+            const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(groundWidth, groundDepth), groundMaterial);
+            groundPlane.rotation.x = -Math.PI / 2; 
+            groundPlane.receiveShadow = true;
+            scene.add(groundPlane);
+
+            const wallProps = [
+                { w: sideWallWidth, d: wallThickness, x: -entranceGapOffset, z: -halfGD }, 
+                { w: sideWallWidth, d: wallThickness, x: entranceGapOffset, z: -halfGD }, 
+                { w: sideWallWidth, d: wallThickness, x: -entranceGapOffset, z: halfGD }, 
+                { w: sideWallWidth, d: wallThickness, x: entranceGapOffset, z: halfGD }, 
+                { w: wallThickness, d: groundDepth + wallThickness * 2, x: -halfGW, z: 0 }, 
+                { w: wallThickness, d: groundDepth + wallThickness * 2, x: halfGW, z: 0 } 
+            ];
+            wallProps.forEach(p => createSegment(p.w, wallHeight, p.d, p.x, halfWH, p.z, brickMaterial, true, 'Wall'));
+
+            // Monitor de Pity Timer
+            const monitorSizeX = 3;
+            const monitorSizeY = 3;
+            const monitorDepth = 0.1;
+            const monitorZ = -halfGD + wallThickness / 2 - monitorDepth / 2; 
+            const monitorGeometry = new THREE.BoxGeometry(monitorSizeX, monitorSizeY, monitorDepth);
+            const monitorMaterials = [ monitorSideMaterial, monitorSideMaterial, monitorSideMaterial, monitorSideMaterial, monitorFrontMaterial, monitorSideMaterial ];
+            const monitorMesh = new THREE.Mesh(monitorGeometry, monitorMaterials);
+            monitorMesh.position.set(-entranceGapOffset, halfWH, monitorZ); 
+            monitorMesh.castShadow = true;
+            monitorMesh.receiveShadow = true;
+            scene.add(monitorMesh);
+
+            // Camino Central (Alfombra)
+            createSegment(centralCarpetWidth, carpetThickness, groundDepth, 0, carpetThickness / 2 + 0.01, 0, carpetMaterial, false, 'Carpet'); 
+
+            // Agujeros
+            // --- CORRECCIÓN DE ERROR ---
+            // El tamaño (holeSize) se reduce de 10 a 8.
+            // Con tamaño 10, el 'playerRadius' (de 1) hacía que la zona de "teleport"
+            // del agujero tocara la zona de colisión de la base, bloqueando la entrada.
+            // Reducir el tamaño a 8 crea un espacio seguro de 1m a cada lado.
+            const holeSize = 8;
+            const holeDepth = 0.2;
+            // Las posiciones (-11 y 11) están correctas, centran el agujero en el hueco.
+            const holePositions = [{ x: -11, z: -25 }, { x: 11, z: -25 }];
+            holePositions.forEach(pos => {
+                const holeMesh = new THREE.Mesh(new THREE.BoxGeometry(holeSize, holeDepth, holeSize), holeMaterial);
+                holeMesh.position.set(pos.x, -holeDepth / 2 - 0.05, pos.z); 
+                scene.add(holeMesh);
+                holeBounds.push({
+                    minX: pos.x - holeSize / 2, maxX: pos.x + holeSize / 2,
+                    minZ: pos.z - holeSize / 2, maxZ: pos.z + holeSize / 2
+                });
+            });
+
+            // --- Casetas (Estructuras) ---
+            const casetaXOffset = centralCarpetWidth / 2 + structureCubeSize / 2 + 10; 
+            const casetaZPositions = [-25, 0, 25]; 
+
+            function createSlotVisuals(baseX, baseZ) {
+                const slotMaterial = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.3 });
+                const slotGeom = new THREE.PlaneGeometry(4, 4); 
+                
+                // Inicializar el inventario de slots para esta base
+                if (baseX === -casetaXOffset && baseZ === casetaZPositions[0]) {
+                    playerBasePosition.set(baseX, 0, baseZ); 
+                    baseInventory = BASE_SLOT_OFFSETS.map(offset => {
+                        const x = baseX + offset.x;
+                        const y = sceneProps.capsuleHeight / 2 + 0.05; 
+                        const z = baseZ + offset.z;
+                        
+                        // Visual de Slot
+                        const slotMesh = new THREE.Mesh(slotGeom, slotMaterial);
+                        slotMesh.rotation.x = -Math.PI / 2; 
+                        slotMesh.position.set(x, 0.01, z); 
+                        scene.add(slotMesh);
+
+                        return {
+                            occupied: false,
+                            capsuleData: null,
+                            position: new THREE.Vector3(x, y, z)
+                        };
+                    });
+                }
+            }
+
+            function createStructure(x, z, isLeft, id) { 
+                const halfSize = structureCubeSize / 2;
+                const thickness = 0.5; 
+                const centerWallY = halfSize; 
+                
+                // Techo y Suelo
+                createSegment(structureCubeSize, thickness, structureCubeSize, x, structureCubeSize - thickness / 2, z, simpleCubeMaterial, true);
+                createSegment(structureCubeSize, thickness, structureCubeSize, x, thickness / 2, z, simpleCubeMaterial, true);
+
+                // Paredes Fijas (Norte y Sur interiores)
+                createSegment(structureCubeSize, structureCubeSize, thickness, x, centerWallY, z + halfSize - thickness / 2, simpleCubeMaterial, true); 
+                createSegment(structureCubeSize, structureCubeSize, thickness, x, centerWallY, z - halfSize + thickness / 2, simpleCubeMaterial, true); 
+                
+                // Pared Lateral Exterior (Oeste o Este)
+                const sideX = isLeft ? x - halfSize + thickness / 2 : x + halfSize - thickness / 2;
+                createSegment(thickness, structureCubeSize, structureCubeSize, sideX, centerWallY, z, simpleCubeMaterial, true);
+
+                // --- NUEVA LÓGICA DE LÁSER Y BOTÓN (PARA TODAS LAS BASES) ---
+                BASE_IDS.push(id); // Registrar el ID de la base
+
+                const entranceX = isLeft ? x + halfSize - thickness / 2 : x - halfSize + thickness / 2;
+                const entranceY = centerWallY;
+                const entranceZ = z;
+
+                // 1. Crear Rejilla de Láser
+                const laserMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.7 });
+                const laserGeom = new THREE.CylinderGeometry(0.05, 0.05, structureCubeSize, 8);
+                const laserGrid = new THREE.Group();
+                laserGrid.position.set(entranceX, entranceY, entranceZ);
+
+                const laserCount = 10;
+                for (let i = 0; i < laserCount; i++) {
+                    const laser = new THREE.Mesh(laserGeom, laserMaterial);
+                    const zPos = -halfSize + (structureCubeSize / (laserCount - 1)) * i;
+                    laser.position.z = zPos;
+                    laserGrid.add(laser);
+                }
+                laserGrid.visible = false;
+                laserGrid.userData = { isClosed: false, closedByUserId: null, reOpenTime: null };
+                scene.add(laserGrid);
+                baseLaserGrids[id] = laserGrid;
+
+                // 2. Crear Límites de Colisión del Láser
+                baseLaserBounds[id] = registerCollisionBounds(laserGrid, 0.5, structureCubeSize, structureCubeSize, false, 'Laser');
+
+                // 3. Crear Botón de Cierre
+                const buttonMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+                const buttonGeom = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16);
+                const buttonMesh = new THREE.Mesh(buttonGeom, buttonMaterial);
+                buttonMesh.position.set(x, thickness + 0.05, z + halfSize - 2); // En el suelo, al fondo
+                buttonMesh.userData = { type: 'BaseButton', baseId: id };
+                scene.add(buttonMesh);
+                baseButtons[id] = buttonMesh;
+
+
+                // Puerta (solo para la base del jugador)
+                if (id === BASE_ID) {
+                    // La lógica de la puerta física se ha eliminado
+                    // ... pero la lógica de los slots se mantiene
+                    
+                    // 7. Visuales de slots (Solo para la base del jugador)
+                    createSlotVisuals(x, z);
+                }
+            }
+
+            // Creación de 6 casetas
+            createStructure(-casetaXOffset, casetaZPositions[0], true, BASE_ID); 
+            createStructure(-casetaXOffset, casetaZPositions[1], true, 'base_2_left');
+            createStructure(-casetaXOffset, casetaZPositions[2], true, 'base_3_left');
+            createStructure(casetaXOffset, casetaZPositions[0], false, 'base_1_right');
+            createStructure(casetaXOffset, casetaZPositions[1], false, 'base_2_right');
+            createStructure(casetaXOffset, casetaZPositions[2], false, 'base_3_right');
+
+            updateStructureBounds(); 
+
+            // --- Iluminación y Controles ---
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
+            directionalLight.position.set(30, 50, 40); 
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.set(2048, 2048);
+            
+            directionalLight.shadow.camera.left = -60;
+            directionalLight.shadow.camera.right = 60;
+            directionalLight.shadow.camera.top = 60;
+            directionalLight.shadow.camera.bottom = -60;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 150;
+            directionalLight.shadow.camera.updateProjectionMatrix();
+
+            scene.add(directionalLight);
+            
+            // Controles de cámara fijos para una vista en primera persona
+            controls = new THREE.OrbitControls(camera, renderer.domElement); 
+            controls.enableDamping = true; 
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 0.3; 
+            controls.enableZoom = false; 
+            controls.enablePan = false; 
+            controls.maxPolarAngle = Math.PI / 2; 
+
+            const initialLookAt = camera.position.clone().add(new THREE.Vector3(0, 0, -1));
+            controls.target.set(initialLookAt.x, initialLookAt.y, initialLookAt.z); 
+            controls.update();
+
+            setupEventListeners();
+        }
+
+        // =========================================================
+        // 7. EVENTOS Y MANEJO DE CONTROLES
+        // =========================================================
+        function setupEventListeners() {
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            // interactionButtonBase.addEventListener('click', toggleDoorState); // Eliminado
+            setupTouchControls();
+            setupBuyInteraction();
+            setupSellInteraction(); // Nuevo setup de venta
+        }
+
+        function onWindowResize() {
+            if (camera && renderer) {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        }
+
+        const onKeyDown = (event) => {
+            switch (event.code) {
+                case 'KeyW': case 'ArrowUp': moveState.forward = true; break;
+                case 'KeyA': case 'ArrowLeft': moveState.left = true; break;
+                case 'KeyS': case 'ArrowDown': moveState.backward = true; break; 
+                case 'KeyD': case 'ArrowRight': moveState.right = true; break;
+            }
+        };
+
+        const onKeyUp = (event) => {
+            switch (event.code) {
+                case 'KeyW': case 'ArrowUp': moveState.forward = false; break;
+                case 'KeyA': case 'ArrowLeft': moveState.left = false; break;
+                case 'KeyS': case 'ArrowDown': moveState.backward = false; break;
+                case 'KeyD': case 'ArrowRight': moveState.right = false; break;
+            }
+        };
+
+        function setupTouchControls() {
+            const buttons = [
+                { id: 'btn-forward', move: 'forward' }, { id: 'btn-backward', move: 'backward' },
+                { id: 'btn-left', move: 'left' }, { id: 'btn-right', move: 'right' }
+            ];
+
+            buttons.forEach(({ id, move }) => {
+                const btn = document.getElementById(id);
+                const setMoveState = (value) => { moveState[move] = value; };
+
+                const handleStart = (e) => { e.preventDefault(); setMoveState(true); };
+                const handleEnd = (e) => { e.preventDefault(); setMoveState(false); };
+
+                btn.addEventListener('mousedown', handleStart);
+                btn.addEventListener('mouseup', handleEnd);
+                btn.addEventListener('mouseleave', handleEnd); 
+                btn.addEventListener('touchstart', handleStart, { passive: false });
+                btn.addEventListener('touchend', handleEnd, { passive: false });
+                btn.addEventListener('touchcancel', handleEnd, { passive: false }); 
+            });
+        }
+        
+        function setupBuyInteraction() {
+            const handleStart = (e) => {
+                e.preventDefault(); 
+                const availableSlotIndex = baseInventory.findIndex(slot => !slot.occupied);
+                
+                if (targetCapsule && currentMoney >= targetCapsule.userData.cost && availableSlotIndex !== -1) { 
+                    isBuying = true;
+                } else if (availableSlotIndex === -1) {
+                    purchaseTip.textContent = `¡Base llena! Haz espacio para comprar.`;
+                    purchaseUI.style.opacity = '1';
+                } else if (targetCapsule) {
+                    purchaseTip.textContent = `¡Faltan $${formatLargeNumber(targetCapsule.userData.cost - currentMoney)} para comprar!`;
+                    purchaseUI.style.opacity = '1';
+                }
+            };
+            const handleEnd = (e) => {
+                e.preventDefault(); 
+                isBuying = false;
+                buyProgress = 0; 
+                if(purchaseProgress) purchaseProgress.style.width = '0%';
+            };
+
+            buyButton.addEventListener('mousedown', handleStart);
+            buyButton.addEventListener('mouseup', handleEnd);
+            buyButton.addEventListener('mouseleave', handleEnd); 
+            buyButton.addEventListener('touchstart', handleStart, { passive: false });
+            buyButton.addEventListener('touchend', handleEnd, { passive: false });
+            buyButton.addEventListener('touchcancel', handleEnd, { passive: false });
+        }
+        
+        function setupSellInteraction() {
+            const handleStart = (e) => {
+                e.preventDefault(); 
+                if (targetPlacedCapsule) { 
+                    isSelling = true;
+                }
+            };
+            const handleEnd = (e) => {
+                e.preventDefault(); 
+                isSelling = false;
+                buyProgress = 0; 
+                if(purchaseProgress) purchaseProgress.style.width = '0%';
+            };
+
+            sellButton.addEventListener('mousedown', handleStart);
+            sellButton.addEventListener('mouseup', handleEnd);
+            sellButton.addEventListener('mouseleave', handleEnd); 
+            sellButton.addEventListener('touchstart', handleStart, { passive: false });
+            sellButton.addEventListener('touchend', handleEnd, { passive: false });
+            sellButton.addEventListener('touchcancel', handleEnd, { passive: false });
+        }
+        
+        // =========================================================
+        // 8. THREE.JS: FUNCIONES DE CÁPSULAS Y LÓGICA DE JUEGO
+        // =========================================================
+        
+        function getCapsuleMesh(characterData) {
+            const { capsuleRadius, capsuleHeight } = sceneProps;
+            let group;
+
+            // Intenta cargar el modelo 3D pre-cargado
+            if (loadedModels[characterData.name]) {
+                group = loadedModels[characterData.name].clone();
+                
+                // Escalar el modelo a un tamaño razonable
+                // Se basa en la altura de la cápsula (2 unidades)
+                const box = new THREE.Box3().setFromObject(group);
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                
+                // Evitar división por cero si el modelo está mal
+                if (maxDim > 0) { 
+                    const scale = capsuleHeight / maxDim;
+                    group.scale.set(scale, scale, scale);
+                } else {
+                    group.scale.set(1, 1, 1);
+                }
+
+                
+                // Asegurarse de que el modelo proyecte/reciba sombras
+                group.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        // Opcional: Si los modelos no tienen texturas, podemos aplicar el color de rareza
+                        // if (!child.material.map) {
+                        //    child.material = new THREE.MeshPhongMaterial({ 
+                        //       color: getRarityColor(characterData.rarity),
+                        //       shininess: 100 
+                        //    });
+                        // }
+                    }
+                });
+
+            } else {
+                // --- Fallback a la geometría original (si el modelo no se cargó) ---
+                // console.warn(`Modelo para ${characterData.name} no encontrado. Usando geometría de fallback.`);
+                const randomColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+                const capsuleMaterial = new THREE.MeshPhongMaterial({ color: randomColor.getHex(), shininess: 100 });
+                
+                if (characterData.rarity) {
+                     capsuleMaterial.color.setHex(getRarityColor(characterData.rarity));
+                }
+
+                group = new THREE.Group();
+                const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(capsuleRadius, capsuleRadius, capsuleHeight, 16), capsuleMaterial);
+                const sphere = new THREE.Mesh(new THREE.SphereGeometry(capsuleRadius, 16, 16), capsuleMaterial);
+                
+                cylinder.castShadow = cylinder.receiveShadow = true;
+                sphere.castShadow = sphere.receiveShadow = true;
+                
+                const sphereBottom = sphere.clone();
+                sphereBottom.position.y = -capsuleHeight / 2;
+                const sphereTop = sphere.clone();
+                sphereTop.position.y = capsuleHeight / 2;
+                
+                group.add(cylinder, sphereBottom, sphereTop);
+            }
+
+            // Asignar userData al grupo principal
+            group.userData = { 
+                type: 'Capsule', 
+                cost: characterData.cost, 
+                dps: characterData.dps, 
+                rarity: characterData.rarity, 
+                name: characterData.name,
+                isCollected: false, 
+                isPlaced: false,
+                targetBase: null,
+                baseSlotIndex: -1
+            };
+            
+            return group;
+        }
+
+
+        function createCapsuleLabel(character) {
+            if (!font) {
+                console.warn("Fuente 3D no cargada, no se puede crear etiqueta.");
+                return new THREE.Group(); 
+            }
+
+            const group = new THREE.Group();
+            const textMaterial = new THREE.MeshPhongMaterial({ 
+                color: getRarityColor(character.rarity), 
+                specular: 0xffffff,
+                shininess: 30,
+            });
+
+            const textOptions = {
+                font: font, size: 0.5, height: 0.05, curveSegments: 12,
+                bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelOffset: 0, bevelSegments: 5
+            };
+
+            const nameGeometry = new THREE.TextGeometry(character.name, textOptions);
+            nameGeometry.computeBoundingBox();
+            const nameWidth = nameGeometry.boundingBox.max.x - nameGeometry.boundingBox.min.x;
+            const nameMesh = new THREE.Mesh(nameGeometry, textMaterial);
+            nameMesh.position.set(-nameWidth / 2, 0.7, sceneProps.capsuleLabelOffset.z);
+            nameMesh.castShadow = true;
+            group.add(nameMesh);
+
+            const rarityTextOptions = { ...textOptions, size: 0.35, height: 0.03, bevelThickness: 0.01, bevelSize: 0.01 };
+            const rarityGeometry = new THREE.TextGeometry(character.rarity, rarityTextOptions);
+            rarityGeometry.computeBoundingBox();
+            const rarityWidth = rarityGeometry.boundingBox.max.x - rarityGeometry.boundingBox.min.x;
+            const rarityMesh = new THREE.Mesh(rarityGeometry, textMaterial);
+            rarityMesh.position.set(-rarityWidth / 2, 0.2, sceneProps.capsuleLabelOffset.z);
+            rarityMesh.castShadow = true;
+            group.add(rarityMesh);
+
+            const dpsMaterial = new THREE.MeshPhongMaterial({ color: 0x10b981, specular: 0xffffff, shininess: 30,});
+            const dpsTextOptions = { ...textOptions, size: 0.4, height: 0.04, bevelThickness: 0.015, bevelSize: 0.015 };
+            const dpsGeometry = new THREE.TextGeometry(`+${formatLargeNumber(character.dps)}/s`, dpsTextOptions);
+            dpsGeometry.computeBoundingBox();
+            const dpsWidth = dpsGeometry.boundingBox.max.x - dpsGeometry.boundingBox.min.x;
+            const dpsMesh = new THREE.Mesh(dpsGeometry, dpsMaterial);
+            dpsMesh.position.set(-dpsWidth / 2, -0.3, sceneProps.capsuleLabelOffset.z);
+            dpsMesh.castShadow = true;
+            group.add(dpsMesh);
+
+            const costMaterial = new THREE.MeshPhongMaterial({ color: 0xef4444, specular: 0xffffff, shininess: 30,});
+            const costTextOptions = { ...textOptions, size: 0.4, height: 0.04, bevelThickness: 0.015, bevelSize: 0.015 };
+            const costGeometry = new THREE.TextGeometry(`$${formatLargeNumber(character.cost)}`, costTextOptions);
+            costGeometry.computeBoundingBox();
+            const costWidth = costGeometry.boundingBox.max.x - costGeometry.boundingBox.min.x;
+            const costMesh = new THREE.Mesh(costGeometry, costMaterial);
+            costMesh.position.set(-costWidth / 2, -0.8, sceneProps.capsuleLabelOffset.z);
+            costMesh.castShadow = true;
+            group.add(costMesh);
+
+            group.position.y = sceneProps.capsuleHeight / 2 + sceneProps.capsuleLabelOffset.y;
+            group.lookAt(camera.position); 
+
+            return group;
+        }
+
+        // Función auxiliar para crear cápsulas que ya están coleccionadas (desde Firebase)
+        function createStaticCapsule(characterData) {
+            const mesh = getCapsuleMesh(characterData);
+            mesh.userData.isCollected = false;
+            mesh.userData.isPlaced = true; 
+            return mesh;
+        }
+
+
+        function spawnCapsule() {
+            let forcedRarity = null;
+            let resetLegendary = false;
+            let resetMythic = false;
+
+            if (mythicTimer >= MYTHIC_GUARANTEE_TIME) {
+                forcedRarity = 'Mitico';
+                resetMythic = true;
+                resetLegendary = true; 
+            } else if (legendaryTimer >= LEGENDARY_GUARANTEE_TIME) {
+                forcedRarity = 'Legendario';
+                resetLegendary = true;
+            }
+
+            const character = selectCharacter(forcedRarity);
+            
+            if (resetMythic) { mythicTimer = 0; }
+            if (resetLegendary) { legendaryTimer = 0; }
+            if (character.rarity === 'Mitico') { mythicTimer = 0; legendaryTimer = 0; } 
+            else if (character.rarity === 'Legendario') { legendaryTimer = 0; }
+            
+            saveTimersState(); 
+
+            const { capsuleStartPos } = sceneProps;
+            
+            const group = getCapsuleMesh(character); 
+            group.position.set(capsuleStartPos.x, capsuleStartPos.y, capsuleStartPos.z);
+            scene.add(group);
+            capsules.push(group);
+            
+            const labelGroup = createCapsuleLabel(character);
+            group.add(labelGroup);
+            group.userData.label = labelGroup;
+        }
+
+        function updateCapsules(delta) {
+            const currentTime = performance.now();
+            if (currentTime - sceneProps.lastCapsuleTime > sceneProps.capsuleSpawnInterval) {
+                spawnCapsule();
+                sceneProps.lastCapsuleTime = currentTime;
+            }
+
+            for (let i = capsules.length - 1; i >= 0; i--) {
+                const capsule = capsules[i];
+                
+                // 1. Cápsulas en movimiento por el carril (No coleccionadas ni colocadas)
+                if (!capsule.userData.isCollected && !capsule.userData.isPlaced) {
+                    capsule.position.z += sceneProps.capsuleSpeed * delta;
+                    
+                    if (capsule.position.z >= sceneProps.capsuleEndPos.z - 0.5) {
+                        scene.remove(capsule);
+                        capsules.splice(i, 1);
+                        if (capsule === targetCapsule) { targetCapsule = null; isBuying = false; buyProgress = 0; }
+                    }
+
+                    if (capsule.userData.label) {
+                        capsule.userData.label.lookAt(camera.position); 
+                    }
+                } 
+                
+                // 2. Cápsulas en transición (Recién compradas)
+                else if (capsule.userData.isCollected && !capsule.userData.isPlaced) {
+                    const target = playerBasePosition;
+                    const speed = 0.8 * delta; // ¡Reducido de nuevo! Era 2.0, ahora es 0.8 para un movimiento mucho más lento
+                    capsule.position.lerp(target, speed); 
+
+                    // Chequear colisión con la base
+                    if (capsule.position.distanceTo(target) < 2.0) {
+                        const availableSlotIndex = baseInventory.findIndex(slot => !slot.occupied);
+                        
+                        if (availableSlotIndex !== -1) {
+                            // Asignar y colocar en el slot
+                            const finalPos = baseInventory[availableSlotIndex].position;
+
+                            capsule.position.copy(finalPos);
+                            capsule.rotation.y = Math.random() * Math.PI * 2; 
+
+                            // Actualizar userData y el inventario persistente
+                            capsule.userData.isCollected = false; 
+                            capsule.userData.isPlaced = true;
+                            capsule.userData.baseSlotIndex = availableSlotIndex;
+                            
+                            baseInventory[availableSlotIndex].occupied = true;
+                            baseInventory[availableSlotIndex].capsuleData = { 
+                                name: capsule.userData.name, 
+                                dps: capsule.userData.dps, 
+                                rarity: capsule.userData.rarity,
+                                cost: capsule.userData.cost
+                            };
+                            saveBaseInventory();
+                        } else {
+                            scene.remove(capsule);
+                            capsules.splice(i, 1);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // =========================================================
+        // 9. LÓGICA DEL TEMPORIZADOR Y BUCLE DE ANIMACIÓN
+        // =========================================================
+        
+        function updateTimers(delta) {
+            legendaryTimer = Math.min(LEGENDARY_GUARANTEE_TIME, legendaryTimer + delta);
+            mythicTimer = Math.min(MYTHIC_GUARANTEE_TIME, mythicTimer + delta);
+            
+            if (Date.now() - lastTimerUpdate > 1000) {
+                 drawTimerCanvas();
+            }
+        }
+
+        function updateMovementAndCollisions(delta) {
+            velocity.x -= velocity.x * 10.0 * delta;
+            velocity.z -= velocity.z * 10.0 * delta;
+            
+            const actualSpeed = movementSpeed * delta * 600;
+            let moved = false;
+
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction); 
+            direction.y = 0; 
+            direction.normalize();
+            
+            const currentPosition = camera.position.clone();
+
+            if (moveState.forward) { camera.position.addScaledVector(direction, actualSpeed); moved = true; }
+            if (moveState.backward) { camera.position.addScaledVector(direction, -actualSpeed); moved = true; }
+            
+            const strafeDirection = new THREE.Vector3().crossVectors(direction, camera.up);
+            strafeDirection.y = 0; 
+            strafeDirection.normalize();
+
+            if (moveState.left) { camera.position.addScaledVector(strafeDirection, -actualSpeed); moved = true; }
+            if (moveState.right) { camera.position.addScaledVector(strafeDirection, actualSpeed); moved = true; }
+            
+            if (moved) {
+                holeBounds.forEach(hole => {
+                    if (camera.position.x + playerRadius > hole.minX && camera.position.x - playerRadius < hole.maxX &&
+                        camera.position.z + playerRadius > hole.minZ && camera.position.z - playerRadius < hole.maxZ) {
+                        camera.position.copy(currentPosition);
+                        return;
+                    }
+                });
+                
+                structureBounds.forEach(bound => {
+                    if (camera.position.x + playerRadius > bound.minX && camera.position.x - playerRadius < bound.maxX &&
+                        camera.position.z + playerRadius > bound.minZ && camera.position.z - playerRadius < bound.maxZ &&
+                        camera.position.y < bound.maxY && camera.position.y > bound.minY) {
+                        
+                        const penXMin = bound.maxX - (camera.position.x - playerRadius);
+                        const penXMax = (camera.position.x + playerRadius) - bound.minX;
+                        const penZMin = bound.maxZ - (camera.position.z - playerRadius);
+                        const penZMax = (camera.position.z + playerRadius) - bound.minZ;
+
+                        let minPen = Infinity;
+                        let correction = { amount: 0, axis: null };
+
+                        // --- CORRECCIÓN DE ERROR DE COLISIÓN ---
+                        // Los signos estaban invertidos. Si golpeas el borde izquierdo de un
+                        // objeto (penXMax), debes ser empujado hacia la derecha (signo +1).
+                        // Si golpeas el borde derecho (penXMin), debes ser empujado
+                        // hacia la izquierda (signo -1).
+
+                        if (penXMin > 0 && penXMin < minPen) { minPen = penXMin; correction = { amount: penXMin, axis: 'X', sign: -1 }; }
+                        if (penXMax > 0 && penXMax < minPen) { minPen = penXMax; correction = { amount: penXMax, axis: 'X', sign: 1 }; }
+                        if (penZMin > 0 && penZMin < minPen) { minPen = penZMin; correction = { amount: penZMin, axis: 'Z', sign: -1 }; }
+                        if (penZMax > 0 && penZMax < minPen) { minPen = penZMax; correction = { amount: penZMax, axis: 'Z', sign: 1 }; }
+
+                        if (correction.axis === 'X') { camera.position.x += correction.amount * correction.sign; } 
+                        else if (correction.axis === 'Z') { camera.position.z += correction.amount * correction.sign; }
+                    }
+                });
+
+                camera.position.y = playerHeight; 
+                
+                const newTarget = camera.position.clone().add(direction.multiplyScalar(0.001));
+                controls.target.set(newTarget.x, newTarget.y, newTarget.z);
+            }
+        }
+
+        function updateDoorAndInteraction(delta) {
+            // Animación de la puerta
+            if (doorMesh) {
+                if (Math.abs(doorMesh.position.y - doorMesh.userData.targetY) > 0.01) {
+                    doorMesh.position.y += (doorMesh.userData.targetY - doorMesh.position.y) * 0.1;
+                } else {
+                    doorMesh.position.y = doorMesh.userData.targetY;
+                }
+                
+                // Mostrar botón de interacción si estás cerca de la base y eres el dueño
+                const basePos = new THREE.Vector3(doorMesh.position.x, playerHeight, doorMesh.position.z);
+                const dist = camera.position.distanceTo(basePos);
+                
+                if (dist < sceneProps.baseRadius + 5 && userId === doorMesh.userData.owner) {
+                    interactionButtonBase.style.display = 'block';
+                } else {
+                    interactionButtonBase.style.display = 'none';
+                }
+            }
+        }
+
+        // ELIMINADA: function updateDoorAndInteraction(delta)
+        // La lógica del botón de la base se mueve a updateBuySellInteraction
+
+        // --- NUEVA LÓGICA DE REAPERTURA AUTOMÁTICA ---
+        function checkAndReopenBases() {
+            if (!db || !Timestamp || !userId) return; // Asegurarse de que Firebase esté listo
+            
+            const now = Timestamp.now();
+
+            for (const baseId of BASE_IDS) {
+                const laserGrid = baseLaserGrids[baseId];
+                if (laserGrid && laserGrid.userData.isClosed && laserGrid.userData.reOpenTime && !laserGrid.userData.isReopening) {
+                    
+                    if (now.seconds >= laserGrid.userData.reOpenTime.seconds) {
+                        // El temporizador ha expirado
+                        // Solo el jugador que la cerró debe enviar la actualización para evitar spam
+                        if (laserGrid.userData.closedByUserId === userId) {
+                            laserGrid.userData.isReopening = true; // Prevenir envíos múltiples
+                            
+                            (async () => {
+                                try {
+                                    await setDoc(getBaseDocRef(baseId), { 
+                                        isClosed: false, 
+                                        closedByUserId: null, 
+                                        reOpenTime: null 
+                                    }, { merge: true });
+                                    // El listener (onSnapshot) se encargará de actualizar el estado visual
+                                    // y resetear 'isReopening' a false.
+                                } catch (error) {
+                                    console.error("Error al reabrir la base:", error);
+                                    laserGrid.userData.isReopening = false; // Permitir reintento si falla
+                                }
+                            })();
+                        }
+                    }
+                }
+            }
+        }
+
+
+        function updateBuySellInteraction(delta) {
+            // 1. Raycasting
+            raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+            
+            // --- NUEVA LÓGICA DE RAYCASTING (RECURSIVA) ---
+            // 1. Obtener los grupos principales de cápsulas
+            const buyableCapsules = capsules.filter(group => 
+                !group.userData.isPlaced && !group.userData.isCollected
+            );
+            const placedCapsules = capsules.filter(group => 
+                group.userData.isPlaced
+            );
+            
+            // 2. Intersectar recursivamente (true)
+            const intersectsBuy = raycaster.intersectObjects(buyableCapsules, true);
+            const intersectsSell = raycaster.intersectObjects(placedCapsules, true);
+            
+            // --- FIN DE LÓGICA DE RAYCASTING ---
+            
+            // --- NUEVO: Raycast para Botones de Base ---
+            const allButtons = Object.values(baseButtons);
+            const intersectsButtons = raycaster.intersectObjects(allButtons, false);
+            let targetButton = intersectsButtons.length > 0 && intersectsButtons[0].distance <= 5 ? intersectsButtons[0].object : null;
+
+
+            // --- FUNCIÓN AUXILIAR PARA ENCONTRAR EL PADRE DE LA CÁPSULA ---
+            const findCapsuleParent = (intersectedObject) => {
+                let parent = intersectedObject;
+                // Sube por el árbol hasta encontrar el userData 'Capsule' o llegar a la raíz
+                while (parent.parent && !parent.userData.type) {
+                    parent = parent.parent;
+                }
+                return (parent && parent.userData.type === 'Capsule') ? parent : null;
+            };
+
+            // Determinar target
+            targetCapsule = intersectsBuy.length > 0 && intersectsBuy[0].distance <= capsuleBuyRange 
+                ? findCapsuleParent(intersectsBuy[0].object) 
+                : null;
+            targetPlacedCapsule = intersectsSell.length > 0 && intersectsSell[0].distance <= capsuleBuyRange 
+                ? findCapsuleParent(intersectsSell[0].object) 
+                : null;
+
+            // 2. Control de la visibilidad y estado de los botones
+            
+            // Ocultar la UI de progreso si no hay interacción de compra/venta activa
+            if (!isBuying && !isSelling) { purchaseUI.style.opacity = '0'; }
+
+
+            // --- Lógica del Botón de COMPRA ---
+            const availableSlotIndex = baseInventory.findIndex(slot => !slot.occupied);
+            const isBaseFull = availableSlotIndex === -1;
+
+            if (targetCapsule) {
+                // Hay una cápsula en el carril
+                sellButton.style.display = 'none';
+                buyButton.style.display = 'block';
+
+                const cost = targetCapsule.userData.cost;
+                const canAfford = currentMoney >= cost;
+                
+                if (isBaseFull) {
+                    buyButton.textContent = `Base Llena`;
+                    buyButton.disabled = true;
+                    buyButton.style.opacity = 0.4;
+                    // Mostrar tip de base llena si el jugador está apuntando
+                    if (intersectsBuy.length > 0) {
+                        purchaseTip.textContent = `¡Base llena! Vende para hacer espacio.`;
+                        purchaseUI.style.opacity = '1';
+                    }
+                } else {
+                    buyButton.textContent = canAfford ? `Comprar ($${formatLargeNumber(cost)})` : `Faltan $${formatLargeNumber(cost - currentMoney)}`;
+                    buyButton.disabled = !canAfford; 
+                    buyButton.style.opacity = canAfford ? 1 : 0.6;
+                    buyButton.style.cursor = canAfford ? 'pointer' : 'default';
+                }
+            } else if (targetPlacedCapsule) {
+                // Hay una cápsula colocada para vender
+                buyButton.style.display = 'none';
+                sellButton.style.display = 'block';
+
+                const salePrice = Math.floor(targetPlacedCapsule.userData.cost / 2);
+                sellButton.textContent = `Vender ($${formatLargeNumber(salePrice)})`;
+                sellButton.disabled = false; 
+                sellButton.style.opacity = 1;
+                sellButton.style.cursor = 'pointer';
+            } else {
+                // No hay nada para comprar ni vender
+                buyButton.style.display = 'block';
+                sellButton.style.display = 'none';
+                
+                buyButton.textContent = `Apunta para Comprar`;
+                buyButton.disabled = true;
+                buyButton.style.opacity = 0.6;
+                buyButton.style.cursor = 'default';
+            }
+            
+            // --- NUEVA LÓGICA: Botón de Interacción de la Base ---
+            if (targetButton) {
+                const baseId = targetButton.userData.baseId;
+                const laserGrid = baseLaserGrids[baseId];
+
+                if (laserGrid && !laserGrid.userData.isClosed) {
+                    interactionButtonBase.style.display = 'block';
+                    interactionButtonBase.textContent = 'Cerrar Base';
+                    // Asignar el handler de click
+                    interactionButtonBase.onclick = () => handleBaseButtonPress(baseId);
+                } else {
+                    // Apuntando a un botón pero la base ya está cerrada
+                    interactionButtonBase.style.display = 'none';
+                    interactionButtonBase.onclick = null;
+                }
+            } else if (!targetCapsule && !targetPlacedCapsule) {
+                 // No apuntando a nada (ni cápsulas ni botones)
+                interactionButtonBase.style.display = 'none';
+                interactionButtonBase.onclick = null;
+            } else if (targetCapsule || targetPlacedCapsule) {
+                // Apuntando a una cápsula (compra/venta), ocultar el botón de la base
+                interactionButtonBase.style.display = 'none';
+                interactionButtonBase.onclick = null;
+            }
+
+
+            // 3. Lógica de Compra/Venta
+
+            if (isBuying) {
+                // Lógica de Compra (si está en curso)
+                buyProgress = Math.min(1.0, buyProgress + delta / buyDuration);
+                
+                purchaseUI.style.opacity = '1';
+                purchaseText.textContent = `Comprando ${targetCapsule.userData.name}: ${Math.round(buyProgress * 100)}%`;
+                purchaseTip.textContent = `Mantén presionado el botón.`;
+                purchaseProgress.style.width = `${buyProgress * 100}%`;
+
+                if (buyProgress >= 1.0) {
+                    const cost = targetCapsule.userData.cost;
+                    const dpsGain = targetCapsule.userData.dps;
+
+                    if (currentMoney >= cost) {
+                        currentMoney -= cost;
+                        
+                        // Iniciar Colección (Movimiento a la base)
+                        targetCapsule.userData.isCollected = true;
+                        targetCapsule.userData.targetBase = playerBasePosition.clone();
+                        
+                        if (targetCapsule.userData.label) {
+                             targetCapsule.remove(targetCapsule.userData.label);
+                             targetCapsule.userData.label = null;
+                        }
+
+                        // Actualización asíncrona de DPS y Dinero
+                        (async () => {
+                            await saveMoneyState();
+                            await updatePlayerDps(dpsGain);
+                        })();
+                        
+                    } else {
+                        purchaseTip.textContent = `¡Compra fallida! Dinero insuficiente.`;
+                    }
+
+                    isBuying = false;
+                    buyProgress = 0;
+                    targetCapsule = null; 
+                    // No ocultamos la UI de progreso aquí para que el mensaje de éxito/fallo se vea por un instante
+                }
+            } else if (isSelling) {
+                // Lógica de Venta (si está en curso)
+                buyProgress = Math.min(1.0, buyProgress + delta / buyDuration);
+                const salePrice = Math.floor(targetPlacedCapsule.userData.cost / 2);
+                const dpsLoss = targetPlacedCapsule.userData.dps;
+                
+                purchaseUI.style.opacity = '1';
+                purchaseText.textContent = `Vendiendo ${targetPlacedCapsule.userData.name}: ${Math.round(buyProgress * 100)}%`;
+                purchaseTip.textContent = `Mantén presionado el botón.`;
+                purchaseProgress.style.width = `${buyProgress * 100}%`;
+
+                if (buyProgress >= 1.0) {
+                    // 4. Completar Venta
+                    currentMoney += salePrice;
+                    updateMoneyDisplay();
+
+                    // Eliminar del inventario
+                    const slotIndex = targetPlacedCapsule.userData.baseSlotIndex;
+                    if (slotIndex !== -1) {
+                        baseInventory[slotIndex].occupied = false;
+                        baseInventory[slotIndex].capsuleData = null;
+                    }
+
+                    // Eliminar de la escena 3D y de la lista de cápsulas
+                    scene.remove(targetPlacedCapsule);
+                    const indexToRemove = capsules.indexOf(targetPlacedCapsule);
+                    if (indexToRemove !== -1) { capsules.splice(indexToRemove, 1); }
+                    
+                    targetPlacedCapsule = null;
+                    
+                    // Actualización asíncrona de DPS y Dinero
+                    (async () => {
+                        await saveMoneyState();
+                        await updatePlayerDps(-dpsLoss); // DPS disminuye
+                        await saveBaseInventory(); // Persistir el slot vacío
+                    })();
+
+                    purchaseTip.textContent = `Vendido por $${formatLargeNumber(salePrice)}! DPS reducido.`;
+
+                    isSelling = false;
+                    buyProgress = 0;
+                    // No ocultamos la UI de progreso aquí para que el mensaje de éxito se vea por un instante
+                }
+            } else {
+                // Si la compra o venta termina, o no hay objetivo, asegurar que el progreso esté a cero.
+                buyProgress = 0; 
+                purchaseProgress.style.width = '0%';
+            }
+        }
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = performance.now();
+            const delta = (time - prevTime) / 1000;
+            
+            if (controls) controls.update(); 
+
+            // Lógica Central del Juego
+            passiveMoneyGain(delta); 
+            updateCapsules(delta); 
+            updateMovementAndCollisions(delta);
+            // updateDoorAndInteraction(delta); // Eliminado
+            updateBuySellInteraction(delta); // Función unificada de interacción
+            updateTimers(delta); 
+
+            // Chequeo de reapertura de bases (1 vez por segundo)
+            const nowInSeconds = time / 1000;
+            if (nowInSeconds - lastBaseCheck > 1.0) {
+                lastBaseCheck = nowInSeconds;
+                checkAndReopenBases();
+            }
+
+            prevTime = time;
+
+            // Renderizado
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        window.onload = setupFirebase;
+
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
