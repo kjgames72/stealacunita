@@ -13,14 +13,12 @@
             margin: 0;
             overflow: hidden;
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Color de fondo base */
+            background-color: #f0f4f8;
         }
-        /* Contenedor de la Escena 3D (inicialmente oculto) */
         #scene-container {
             width: 100vw;
             height: 100vh;
             position: relative;
-            display: none; /* Oculto hasta que se inicia el juego */
         }
         canvas {
             display: block;
@@ -168,7 +166,7 @@
             background-color: #d97706;
         }
 
-        /* --- Estilos de la Tienda --- */
+        /* --- NUEVO: Estilos de la Tienda --- */
         #shop-button {
             background-color: #8b5cf6; /* Violeta */
             pointer-events: auto;
@@ -177,6 +175,18 @@
             box-shadow: 0 2px #5b21b6;
             transform: translateY(2px);
             background-color: #7c3aed;
+        }
+
+        /* NUEVO: Estilo para el botón de Reclamar Todo */
+        #collect-all-button {
+            background-color: #10b981; /* Verde Esmeralda (Tailwind emerald-500) */
+            /* REQ: Vuelve a estar visible */
+            /* display: none; */ 
+        }
+        #collect-all-button:active:not(:disabled) { /* REQ: Añadido :not(:disabled) */
+            box-shadow: 0 2px #057a55; /* Sombra más oscura (emerald-700) */
+            transform: translateY(2px);
+            background-color: #059669; /* Un poco más oscuro (emerald-600) */
         }
 
         #shop-menu {
@@ -248,9 +258,47 @@
             transform: translateY(2px);
             box-shadow: 0 2px #057a55;
         }
+        
+        /* NUEVO: Botón de Probabilidades */
+        #show-admin-probs-button {
+            background-color: #3b82f6; /* Azul */
+            box-shadow: 0 4px #1e40af;
+            margin-right: 0.5rem; /* 8px */
+            padding: 0.5rem 0.75rem; /* Más pequeño */
+            font-size: 0.875rem; /* sm */
+        }
+        #show-admin-probs-button:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px #1e40af;
+        }
         /* --- Fin Estilos Tienda --- */
 
-        /* --- Estilos Controles de Vuelo --- */
+        /* --- NUEVO: Estilos de Índice --- */
+        #index-button {
+            background-color: #0ea5e9; /* Azul Cielo */
+            pointer-events: auto;
+        }
+        #index-button:active {
+            box-shadow: 0 2px #0369a1;
+            transform: translateY(2px);
+            background-color: #0284c7;
+        }
+        /* Ocultar por defecto los menús */
+        #index-menu, #admin-probs-modal {
+            display: none;
+            /* --- NUEVO: Estilos de Overlay (copiados de #shop-menu) --- */
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            /* --- FIN NUEVO --- */
+        }
+        /* --- Fin Estilos Índice --- */
+
+
+        /* --- NUEVO: Estilos Controles de Vuelo --- */
         #flight-controls {
             position: absolute;
             bottom: 20px;
@@ -332,136 +380,6 @@
         }
     </style>
     
-<style>
-        /* --- NUEVO: Estilos del Lobby --- */
-        #lobby-container {
-            position: absolute;
-            inset: 0;
-            background-color: #1f2937; /* Fondo oscuro */
-            z-index: 100;
-            display: none; /* Se activa por JS */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            padding: 2rem;
-        }
-        .lobby-card {
-            background-color: #374151;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-        .lobby-title {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-        }
-        .lobby-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            border: none;
-            background-color: #4b5563;
-            color: white;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .lobby-input::placeholder {
-            color: #9ca3af;
-        }
-        .lobby-button {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            border: none;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        }
-        .lobby-button-create {
-            background-color: #10b981;
-            color: white;
-            margin-bottom: 0.75rem;
-        }
-        .lobby-button-create:active {
-            background-color: #059669;
-            transform: translateY(2px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .lobby-button-join {
-            background-color: #3b82f6;
-            color: white;
-        }
-        .lobby-button-join:active {
-            background-color: #2563eb;
-            transform: translateY(2px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .lobby-divider {
-            margin: 1.5rem 0;
-            border-color: #4b5563;
-        }
-
-        /* --- NUEVO: UI de Información de Sala --- */
-        #room-info-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 40;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            color: #1f2937;
-            display: none; /* Oculto hasta unirse a la sala */
-            max-width: 300px;
-        }
-        #room-code-display {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #1d4ed8;
-            margin-bottom: 0.5rem;
-        }
-        #player-list-display h4 {
-            font-weight: bold;
-            margin-bottom: 0.25rem;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 0.25rem;
-        }
-        #player-list-display ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        #player-list-display li {
-            padding: 0.1rem 0;
-            font-size: 0.9rem;
-        }
-        
-        /* --- NUEVO: Toast de Error --- */
-        #error-toast {
-            position: absolute;
-            bottom: -100px; /* Oculto fuera de la pantalla */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #ef4444; /* Rojo */
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            font-weight: bold;
-            z-index: 200;
-            transition: bottom 0.5s ease-in-out;
-        }
-
-    </style>
-    
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
@@ -470,42 +388,14 @@
 </head>
 <body>
 
-    <!-- NUEVO: Contenedor del Lobby (Se muestra primero) -->
-    <div id="lobby-container" class="absolute inset-0 flex flex-col items-center justify-center z-50" style="display: none;">
-        <div class="lobby-card">
-            <h1 class="lobby-title">Duelo Jugador vs CPU</h1>
-            <input type="text" id="player-name-input" class="lobby-input" placeholder="Ingresa tu nombre..." maxlength="20">
-            
-            <button id="btn-create-room" class="lobby-button lobby-button-create">Crear Sala</button>
-            
-            <hr class="lobby-divider" />
-            
-            <input type="text" id="room-code-input" class="lobby-input" placeholder="Ingresa código de sala..." maxlength="5">
-            <button id="btn-join-room" class="lobby-button lobby-button-join">Unirse a Sala</button>
-        </div>
-    </div>
-    
-    <!-- NUEVO: Toast de Error -->
-    <div id="error-toast"></div>
-
-    <!-- Contenedor de la Escena 3D (Oculto al inicio) -->
     <div id="scene-container">
         
-        <div class="info-box"></div>
-        
-        <!-- NUEVO: Información de la Sala (en el juego) -->
-        <div id="room-info-container">
-            <div id="room-code-display">Sala: ...</div>
-            <div id="player-list-display">
-                <h4>Jugadores:</h4>
-                <ul></ul>
-            </div>
-        </div>
+<div class="info-box"></div>
 
         
 <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
-            <!-- MODIFICADO: Texto de carga dinámico -->
-            <div id="loading-text" class="text-white p-4 rounded-lg bg-indigo-600 shadow-xl">Cargando escena y autenticación...</div>
+            <!-- MODIFICADO: Mensaje de carga genérico -->
+            <div class="text-white p-4 rounded-lg bg-indigo-600 shadow-xl">Cargando escena...</div>
         </div>
         
         
@@ -522,6 +412,9 @@
             <div id="money-display">$100</div>
             <!-- NUEVO: Botón de Tienda -->
             <button id="shop-button" class="action-button">Tienda</button>
+            <!-- NUEVO: Botón de Índice -->
+            <button id="index-button" class="action-button">Índice</button>
+            <!-- NUEVO: Botón Reclamar Todo -->
             <!-- ELIMINADO: Botón Reclamar Todo -->
         </div>
 
@@ -538,7 +431,7 @@
         
 <button id="interaction-button-base">Cerrar Base</button>
 
-        <!-- Menú de Tienda -->
+        <!-- NUEVO: Menú de Tienda -->
         <div id="shop-menu">
             <div id="shop-container">
                 <button id="close-shop-button">&times;</button>
@@ -581,13 +474,29 @@
                         <h3 class="text-lg font-bold text-gray-700">Cunita Block Admin</h3>
                         <p class="text-sm text-gray-500">$100 Millones</p>
                     </div>
-                    <button id="buy-admin-block" class="shop-item-button">Comprar</p>
+                    <!-- MODIFICADO: Contenedor para dos botones -->
+                    <div class="flex items-center">
+                        <button id="show-admin-probs-button" class="shop-item-button">Ver %</button>
+                        <button id="buy-admin-block" class="shop-item-button">Comprar</button>
+                    </div>
                 </div>
 
             </div>
         </div>
 
-        <!-- Controles de Vuelo -->
+        <!-- NUEVO: Menú de Índice -->
+        <div id="index-menu">
+            <div id="index-container" class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-2xl h-5/6 max-h-[800px] relative flex flex-col">
+                <button id="close-index-button" class="absolute top-2 right-2 w-10 h-10 rounded-full bg-gray-200 text-gray-600 text-2xl font-bold hover:bg-gray-300 transition-all hover:rotate-90">&times;</button>
+                <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">Índice de Personajes</h2>
+                <div id="index-content" class="flex-grow overflow-y-auto pr-2">
+                    <!-- El contenido se generará por JS -->
+                </div>
+            </div>
+        </div>
+        <!-- Fin Menú de Índice -->
+
+        <!-- NUEVO: Controles de Vuelo -->
         <div id="flight-controls">
             <button id="btn-fly-up" class="flight-button">↑</button>
             <button id="btn-fly-down" class="flight-button">↓</button>
@@ -595,6 +504,20 @@
 
     </div>
 
+    <!-- NUEVO: Modal de Probabilidades Admin Block -->
+    <div id="admin-probs-modal">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-md relative">
+            <button id="close-admin-probs-button" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-gray-200 text-gray-600 text-xl font-bold hover:bg-gray-300 transition-all hover:rotate-90">&times;</button>
+            <h2 class="text-xl font-bold text-center mb-4 text-gray-800">Probabilidades de Cunita Block</h2>
+            <div id="admin-probs-content" class="space-y-2">
+                <!-- El contenido se generará por JS -->
+            </div>
+        </div>
+    </div>
+    <!-- Fin Modal Probabilidades -->
+
+
+    <!-- ELIMINADO: Todas las importaciones de Firebase -->
     <script type="module">
         // =========================================================
         // 1. CONSTANTES GLOBALES Y ESTADO (THREE.JS & GAME)
@@ -609,7 +532,7 @@
         const purchaseText = document.getElementById('purchase-text');
         const purchaseTip = document.getElementById('purchase-tip');
 
-        // --- Elementos de la Tienda y Vuelo ---
+        // --- NUEVO: Elementos de la Tienda y Vuelo ---
         const shopMenu = document.getElementById('shop-menu');
         const shopButton = document.getElementById('shop-button');
         const closeShopButton = document.getElementById('close-shop-button');
@@ -620,34 +543,44 @@
         const buyLuck4Btn = document.getElementById('buy-luck-4');
         const buyLuck6Btn = document.getElementById('buy-luck-6');
         const buyCarpetBtn = document.getElementById('buy-carpet');
-        // const collectAllButton = document.getElementById('collect-all-button'); // ELIMINADO
+        const collectAllButton = document.getElementById('collect-all-button'); // NUEVO
+        
+        // --- NUEVO: Elementos del Índice ---
+        const indexMenu = document.getElementById('index-menu');
+        const indexButton = document.getElementById('index-button');
+        const closeIndexButton = document.getElementById('close-index-button');
+        const indexContent = document.getElementById('index-content');
+        
+        // --- NUEVO: Elementos de Probabilidades Admin ---
+        const adminProbsModal = document.getElementById('admin-probs-modal');
+        const showAdminProbsButton = document.getElementById('show-admin-probs-button');
+        const closeAdminProbsButton = document.getElementById('close-admin-probs-button');
+        const adminProbsContent = document.getElementById('admin-probs-content');
+        // --- FIN NUEVO ---
 
 
         // Estado del Juego
         let currentMoney = 100;
-        let currentBaseDps = 0; 
-        
-        // --- MODIFICADO: Lógica de Base del Jugador ---
-        // const BASE_ID = 'base_1_left'; // ELIMINADO: Ahora es dinámico
-        let playerBaseId = null; // Se asignará al unirse a la sala
-        const ALL_BASE_IDS = ['base_1_left', 'base_1_right', 'base_2_left', 'base_2_right', 'base_3_left', 'base_3_right'];
-        // --- FIN MODIFICADO ---
-
+        let currentBaseDps = 0; // NUEVO: Para rastrear el DPS total de la base
+        // let playerDps = 0; // ELIMINADO: El DPS ahora se maneja por cápsula
+        const BASE_ID = 'base_1_left'; 
         const capsuleBuyRange = 10;
         const buyDuration = 0.2; // Duración para compra/venta instantánea
         
-        // --- Estado de Mejoras ---
+        // --- NUEVO: Estado de Mejoras ---
         let luckMultiplier = 1;
         let isFlying = false;
         const LUCK_PRICES = { 2: 100000, 4: 500000, 6: 2000000 };
         const CARPET_PRICE = 10000000;
+        // --- FIN NUEVO ---
 
-        // --- Acumulador de dinero pasivo ---
+        // --- NUEVO: Acumulador de dinero pasivo ---
         let moneyAccumulator = 0;
         let lastMoneySaveTime = 0;
         const MONEY_SAVE_INTERVAL = 5; // Guardar cada 5 segundos
+        // --- FIN NUEVO ---
 
-        // --- Constantes del Admin Block ---
+        // --- NUEVO: Constantes del Admin Block ---
         const ADMIN_BLOCK_PRICE = 100000000;
         const ADMIN_BLOCK_PROBS = [
             { name: "Baby Goblin cucumber", prob: 30.0 },
@@ -660,6 +593,7 @@
             { name: "don pollo", prob: 0.25 }
         ];
         let adminBlocks = []; // Array para los blocks activos
+        // --- FIN NUEVO ---
 
         // Temporizadores de Aparición Garantizada (Pity Timer)
         const LEGENDARY_GUARANTEE_TIME = 4 * 60; 
@@ -673,7 +607,7 @@
         // Inventario y Base del Jugador
         let playerBasePosition = new THREE.Vector3(); 
         let baseInventory = []; 
-        // let slotCollectionState = {}; // ELIMINADO
+        let slotCollectionState = {}; // REQ: ELIMINADO
         const BASE_SLOT_OFFSETS = [
             { x: -3.5, z: -3.5 }, { x: 3.5, z: -3.5 }, 
             { x: -3.5, z: 0 },    { x: 3.5, z: 0 },    
@@ -691,8 +625,8 @@
         let doorMesh;
         let isDoorOpen = true; 
 
-        // Estado de las Bases (Láseres y Botones)
-        let BASE_IDS = []; // MODIFICADO: Se poblará en init3DScene
+        // NUEVO: Estado de las Bases (Láseres y Botones)
+        const BASE_IDS = [];
         const baseLaserGrids = {};
         const baseLaserBounds = {};
         const baseButtons = {};
@@ -713,7 +647,19 @@
         let targetPlacedCapsule = null; // Cápsula colocada que se va a vender
         // let collectButtons = []; // ELIMINADO
 
-        // --- ELIMINADOS: Estados de Recolección Manual ---
+        // --- REQ: Nuevas variables para Auto-Recolección ---
+        /* REQ: Eliminadas variables de auto-recolección
+        let autoCollectTimer = 0;
+        const AUTO_COLLECT_INTERVAL = 3.0; // 3 segundos
+        */
+        // --- FIN REQ ---
+
+        // --- REQ: Nuevas variables para Recolección Manual (tipo Compra) ---
+        // let isCollecting = false; // REQ: ELIMINADO
+        // let collectProgress = 0; // REQ: ELIMINADO
+        // let totalMoneyToCollect = 0; // ELIMINADO
+        // const collectDuration = 0.2; // REQ: ELIMINADO
+        // --- FIN REQ ---
 
 
         // Propiedades de la Escena 
@@ -742,53 +688,41 @@
         let doorBounds = null; 
         let holeBounds = []; 
 
-        // --- NUEVO: Estado del Lobby ---
-        let currentRoomId = null;
-        let roomListenerUnsubscribe = null;
-        let allPlayers = {}; // { userId: { name: "...", baseId: "..." } }
-
         // =========================================================
-        // 2. CONFIGURACIÓN DE FIREBASE 
-        // =========================================================
-        // MODIFICADO: Usar la variable __app_id proporcionada por el entorno
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // MODIFICADO: Cargar la configuración de Firebase desde el entorno
-        let firebaseConfig;
-        try {
-            firebaseConfig = JSON.parse(__firebase_config);
-        } catch (e) {
-            console.error("Error parsing __firebase_config:", e);
-            // Configuración de fallback para pruebas locales (en caso de que __firebase_config no esté)
-            firebaseConfig = {
-                apiKey: "AIzaSyC-3QWjxrG2EY4BO3i6NXBG_swPnGnMs5Y",
-                authDomain: "idkkkkkkkkkkkkkkkk-c0ed0.firebaseapp.com",
-                projectId: "idkkkkkkkkkkkkkkkk-c0ed0",
-                storageBucket: "idkkkkkkkkkkkkkkkk-c0ed0.firebasestorage.app",
-                messagingSenderId: "66190789281",
-                appId: "1:66190789281:web:dce318b1d88e6398b33ee0",
-                measurementId: "G-37FPTD4MMV"
-            };
-        }
-
-
-        let db, auth, userId;
-        let initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged;
-        let getFirestore, doc, setDoc, onSnapshot, serverTimestamp, Timestamp;
-        let updateDoc, increment, getDoc; // <-- AÑADIDO getDoc, updateDoc
-
-        // =========================================================
-        // 3. DATOS Y AYUDAS DE FORMATO (PERSONAJES Y MATEMÁTICAS)
+        // 2. CONFIGURACIÓN DE FIREBASE (ELIMINADA)
         // =========================================================
         
-        // ... (CHARACTER_DATA, formatLargeNumber, formatTime, getRarityColor, getEffectiveProbabilities, selectCharacter ... sin cambios)
+        // ELIMINADO: const appId
+        // ELIMINADO: let firebaseConfig
+        // ELIMINADO: let db, auth, userId;
+        // ELIMINADO: let initializeApp, getAuth, ... etc.
+
+        // =========================================================
+        // 3. DATOS Y AYUDAS de FORMATO (PERSONAJES Y MATEMÁTICAS)
+        // =========================================================
+        
         const RARITY_PROBABILITIES = { "Comun": 55.0, "Raro": 30.0, "Epico": 10.0, "Legendario": 4.0, "Mitico": 0.8, "God": 0.1, "Secreto": 0.1 };
-        const CHARACTER_WEIGHTS = { "Retolam": 0.5, "Shrek": 0.3, "Chuck Norris": 0.2, "Obamium": 1.0 };
+        const CHARACTER_WEIGHTS = { 
+            "Retolam": 0.5, 
+            "Shrek": 0.15, /* MODIFICADO: 0.3 -> 0.15 (Más raro) */
+            "Chuck Norris": 0.2, 
+            "Obamium": 1.0,
+            // --- NUEVOS PESOS (RARITY) ---
+            "Hombre Pie": 0.4, /* MODIFICADO: 0.15 -> 0.4 (Más común) */
+            "Boss Bandit": 0.2, // 2do más raro (God)
+            "Coraje Berenjena": 0.3, // Menos raro que BB, más raro que JH
+            "JH de la cruz": 0.4, // Menos raro que CB
+            // --- NUEVO PERSONAJE DIOS ---
+            "knee surgery": 0.1 // El Dios más raro
+            // --- FIN NUEVO PERSONAJE DIOS ---
+            // --- FIN NUEVOS PESOS ---
+        };
         const CHARACTER_DATA = [
             { name: "Shrek", cost: 10000000000, dps: 50000000, rarity: "Secreto", modelFile: "shrek.glb" }, 
             { name: "CR7", cost: 225000, dps: 900, rarity: "Legendario", modelFile: "CR7.glb" },
             { name: "Mordecai", cost: 10000, dps: 75, rarity: "Epico", modelFile: "mordecai.glb" }, 
-            { name: "Obamium", cost: 435000000, dps: 235000, rarity: "God", modelFile: "obamium.glb" },
+            // MODIFICADO: Costo y DPS (Balance)
+            { name: "Obamium", cost: 45000000, dps: 240000, rarity: "God", modelFile: "obamium.glb" },
             { name: "Tails", cost: 25000, dps: 250, rarity: "Legendario", modelFile: "tails.glb" }, 
             { name: "Limpin", cost: 700, dps: 7, rarity: "Comun", modelFile: "limpin.glb" },
             { name: "Invincible", cost: 8500000, dps: 8700, rarity: "Mitico", modelFile: "invincible.glb" }, 
@@ -803,11 +737,35 @@
             { name: "Lorenzo", cost: 500, dps: 5, rarity: "Comun", modelFile: "lorenzo.glb" },
             { name: "Baby Goblin", cost: 250, dps: 3, rarity: "Comun", modelFile: "baby goblin.glb" },
 
+            // --- NUEVOS PERSONAJES (AÑADIDOS POR USUARIO) ---
+            { name: "Martita", cost: 1500, dps: 13, rarity: "Comun", modelFile: "martita.glb" },
+            { name: "Coraje", cost: 9500, dps: 70, rarity: "Raro", modelFile: "coraje.glb" },
+            { name: "Mini Pekka", cost: 39000, dps: 240, rarity: "Epico", modelFile: "mini-pekka.glb" },
+            // Stats (12k DPS) entre Invincible (8700) y Baby Goblin Cucumber (13500)
+            { name: "Shadow", cost: 6000000, dps: 12000, rarity: "Mitico", modelFile: "shadow.glb" }, 
+            // MODIFICADO: Costo y DPS (Balance)
+            { name: "Boss Bandit", cost: 85000000, dps: 320000, rarity: "God", modelFile: "boss-bandit.glb" },
+            // --- NUEVO PERSONAJE DIOS (Knee Surgery) ---
+            // Stats (350k DPS) > Boss Bandit (295k) y Calzoski (300k)
+            // Cost (80M) > Boss Bandit (60M) y Calzoski (50M)
+            // MODIFICADO: Costo (Balance)
+            { name: "knee surgery", cost: 95000000, dps: 350000, rarity: "God", modelFile: "knee-surgery.glb" }, /* MODIFICADO: Costo 200M -> 80M */
+            // --- FIN NUEVO PERSONAJE DIOS ---
+            // Stats (230k DPS) entre Mohawk mark (220k) y Obamium (235k)
+            // MODIFICADO: Costo y DPS (Balance)
+            { name: "JH de la cruz", cost: 55000000, dps: 260000, rarity: "God", modelFile: "jh-de-la-cruz.glb" }, 
+            // Stats (250k DPS) entre Obamium (235k) y Boss Bandit (295k)
+            // MODIFICADO: Costo y DPS (Balance)
+            { name: "Coraje Berenjena", cost: 65000000, dps: 280000, rarity: "God", modelFile: "coraje-berenjena.glb" },
+            { name: "Hombre Pie", cost: 3500000000, dps: 30000000, rarity: "Secreto", modelFile: "hombre-pie.glb" },
+            // --- FIN NUEVOS PERSONAJES ---
+
             // --- NUEVOS PERSONAJES (ADMIN BLOCK) ---
             { name: "Baby Goblin cucumber", cost: 4500000, dps: 13500, rarity: "Mitico", modelFile: "Baby Goblin cucumber.glb" },
             { name: "Finx humilde", cost: 17500000, dps: 85000, rarity: "God", modelFile: "Finx humilde.glb" },
             { name: "Mohawk mark", cost: 42500000, dps: 220000, rarity: "God", modelFile: "Mohawk mark.glb" },
-            { name: "Calzoski", cost: 50000000, dps: 300000, rarity: "God", modelFile: "Calzoski.glb" },
+            // MODIFICADO: Costo (Balance)
+            { name: "Calzoski", cost: 75000000, dps: 300000, rarity: "God", modelFile: "Calzoski.glb" },
             { name: "homo y barto", cost: 75000000, dps: 410000, rarity: "Secreto", modelFile: "homo y barto.glb" },
             { name: "canaima", cost: 120000000, dps: 550000, rarity: "Secreto", modelFile: "canaima.glb" },
             { name: "larin", cost: 1200000000, dps: 7500000, rarity: "Secreto", modelFile: "larin.glb" },
@@ -818,6 +776,7 @@
         const CHARACTERS_BY_RARITY = {};
         const TOTAL_WEIGHTS_BY_RARITY = {};
         
+        // Pre-cálculo de pesos y rareza
         CHARACTER_DATA.forEach(char => {
             const rarity = char.rarity;
             if (!CHARACTERS_BY_RARITY[rarity]) {
@@ -835,9 +794,10 @@
             if (num >= 1e9) return (num / 1e9).toFixed(1) + ' Mil Millones';
             if (num >= 1e6) return (num / 1e6).toFixed(1) + ' Millones';
             if (num >= 1e3) return (num / 1e3).toFixed(0) + 'K';
+            // MODIFICACIÓN: Mostrar decimales para números pequeños
             if (num < 1 && num > 0) return num.toFixed(2);
-            if (num >= 1 && num < 1000) return num.toFixed(0); 
-            return num.toFixed(0);
+            if (num >= 1 && num < 1000) return num.toFixed(0); // Mantener sin decimales para 1-999
+            return num.toFixed(0); // Fallback
         }
         
         function formatTime(totalSeconds) {
@@ -860,36 +820,61 @@
             }
         }
         
+        // --- NUEVO: Cálculo de Probabilidades de Suerte ---
         function getEffectiveProbabilities(multiplier) {
             const baseProbs = { ...RARITY_PROBABILITIES };
-            if (multiplier <= 1) { return baseProbs; }
+            if (multiplier <= 1) {
+                return baseProbs;
+            }
+
             const newProbs = { ...baseProbs };
             const commonProb = newProbs["Comun"];
             let boostAmountStolen = 0;
+
+            // Aumentar la probabilidad de los raros y calcular cuánto "robamos" al común
             for (const rarity in newProbs) {
                 if (rarity !== "Comun") {
                     const originalProb = baseProbs[rarity];
+                    // Multiplicamos la probabilidad base por el multiplicador
                     const boostedProb = originalProb * multiplier;
                     const gain = boostedProb - originalProb;
+                    
                     boostAmountStolen += gain;
                     newProbs[rarity] = boostedProb;
                 }
             }
-            newProbs["Comun"] = Math.max(1.0, commonProb - boostAmountStolen); 
+
+            // Reducir la probabilidad común
+            newProbs["Comun"] = Math.max(1.0, commonProb - boostAmountStolen); // Dejar al menos 1%
+
+            // Re-normalizar todo para que sume 100
             let totalProb = 0;
-            for (const rarity in newProbs) { totalProb += newProbs[rarity]; }
+            for (const rarity in newProbs) {
+                totalProb += newProbs[rarity];
+            }
+
             const scaleFactor = 100 / totalProb;
-            for (const rarity in newProbs) { newProbs[rarity] *= scaleFactor; }
+            for (const rarity in newProbs) {
+                newProbs[rarity] *= scaleFactor;
+            }
+            
+            // console.log("Probabilidades Efectivas:", newProbs); // Para depuración
             return newProbs;
         }
         
         function selectCharacter(forcedRarity = null) {
             let selectedRarity = forcedRarity;
+            
             if (!selectedRarity) {
+                // --- MODIFICADO: Usar probabilidades efectivas ---
                 const effectiveProbs = getEffectiveProbabilities(luckMultiplier);
+                // --- FIN MODIFICADO ---
+
                 let randomRarityRoll = Math.random() * 100;
                 let cumulativeProbability = 0;
-                selectedRarity = 'Comun'; 
+                selectedRarity = 'Comun'; // Fallback
+
+                // --- MODIFICADO: Iterar sobre effectiveProbs ---
                 for (const rarity in effectiveProbs) {
                     cumulativeProbability += effectiveProbs[rarity];
                     if (randomRarityRoll <= cumulativeProbability) {
@@ -897,16 +882,21 @@
                         break;
                     }
                 }
+                // --- FIN MODIFICADO ---
             }
+
             const characterPool = CHARACTERS_BY_RARITY[selectedRarity];
             const totalWeight = TOTAL_WEIGHTS_BY_RARITY[selectedRarity];
+            
             if (!characterPool || characterPool.length === 0 || totalWeight === 0) {
                  console.warn(`Pool for rarity ${selectedRarity} is empty. Falling back to Comun.`);
                  return CHARACTERS_BY_RARITY['Comun'][0];
             }
+            
             let randomCharacterRoll = Math.random() * totalWeight;
             let cumulativeWeight = 0;
             let selectedCharacter = characterPool[0];
+
             for (const char of characterPool) {
                 cumulativeWeight += char.weight;
                 if (randomCharacterRoll <= cumulativeWeight) {
@@ -914,15 +904,17 @@
                     break;
                 }
             }
+            
             return selectedCharacter;
         }
 
         // =========================================================
-        // 2B. FUNCIONES DE FIREBASE / ESTADO DEL JUGADOR
+        // 2. FUNCIONES DE LOCALSTORAGE / ESTADO DEL JUGADOR
         // =========================================================
 
         function updateMoneyDisplay() {
-            // Muestra el dinero de Firebase + el acumulador local
+            // MODIFICADO: Ahora muestra el dinero actual Y el DPS total de la base
+            // MODIFICADO V2: Muestra el dinero de Firebase + el acumulador local
             const displayMoney = currentMoney + moneyAccumulator;
             const moneyHtml = `<div>\$${formatLargeNumber(displayMoney)}</div>`;
             const dpsHtml = `<span class="block text-sm text-green-200 opacity-90 font-normal">+${formatLargeNumber(currentBaseDps)}/s</span>`;
@@ -930,6 +922,7 @@
             moneyDisplay.innerHTML = `${moneyHtml}${currentBaseDps > 0 ? dpsHtml : ''}`;
         }
         
+        // NUEVA FUNCIÓN: Calcula el DPS total de todas las cápsulas en la base
         function calculateBaseDps() {
             let totalDps = 0;
             if (baseInventory && baseInventory.length > 0) {
@@ -941,600 +934,186 @@
             }
             currentBaseDps = totalDps;
         }
+        
+        // ELIMINADO: passiveMoneyGain(delta)
 
-        async function saveMoneyState() {
-            if (!userId || !db) return;
-            const moneyRef = doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'money_state');
-            try {
-                // MODIFICADO: Guarda el dinero de FB más el acumulado y resetea el acumulador
-                const totalToSave = currentMoney + moneyAccumulator;
-                moneyAccumulator = 0; // Resetea el acumulador
-                currentMoney = totalToSave; // Sincroniza el estado local
-                await setDoc(moneyRef, { balance: totalToSave }, { merge: true });
-                updateMoneyDisplay(); // Actualiza la UI con el valor sincronizado
-            } catch (error) {
-                console.error("Error al guardar el dinero:", error);
-            }
+        // MODIFICADO: Ahora usa localStorage
+        function saveMoneyState() {
+            localStorage.setItem('game_money', JSON.stringify(currentMoney));
         }
 
-        function setupMoneyListener() {
-            if (!db || !userId) return;
-            const moneyRef = doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'money_state');
-            onSnapshot(moneyRef, (docSnap) => {
-                if (docSnap.exists() && typeof docSnap.data().balance === 'number') {
-                    // Sincroniza con Firebase, pero mantiene el acumulador local
-                    currentMoney = docSnap.data().balance; 
-                    updateMoneyDisplay();
-                    updateShopUI(); 
-                } else {
-                    saveMoneyState();
-                }
-            }, (error) => {
-                console.error("Error al escuchar el estado del dinero:", error);
-            });
+        // ELIMINADO: setupMoneyListener()
+        
+        // --- MODIFICADO: Función de actualización de dinero síncrona ---
+        function updateMoneyBalance(amount) {
+            if (amount === 0) return;
+            currentMoney += amount;
+            saveMoneyState();
+            updateMoneyDisplay(); // ¡Importante! Llamar manualmente
+            updateShopUI(); // ¡Importante! Actualizar la tienda
+        }
+        // --- FIN MODIFICADO ---
+
+        // ELIMINADO: getDpsDocRef()
+        // ELIMINADO: updatePlayerDps(dpsChange)
+        // ELIMINADO: setupDpsListener()
+        
+        // ELIMINADO: getTimerDocRef()
+
+        // MODIFICADO: Ahora usa localStorage
+        function saveTimersState() {
+            const timers = { 
+                legendaryTimer: legendaryTimer,
+                mythicTimer: mythicTimer,
+            };
+            localStorage.setItem('game_timers', JSON.stringify(timers));
         }
         
-        async function updateMoneyBalance(amount) {
-            if (!userId || !db || !increment || !updateDoc || amount === 0) return;
-            const moneyRef = doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'money_state');
-            try {
-                await updateDoc(moneyRef, { balance: increment(amount) });
-                
-                // Si la actualización es negativa (una compra), reseteamos el acumulador local
-                // para que el snapshot de firebase sea la fuente de verdad.
-                if (amount < 0) {
-                    moneyAccumulator = 0;
-                }
-            } catch (error) {
-                console.error("Error al actualizar el dinero atómicamente:", error);
-                try {
-                    const newBalance = currentMoney + moneyAccumulator + amount; // Cálculo local completo
-                    moneyAccumulator = 0; // Resetea
-                    await setDoc(moneyRef, { balance: newBalance }, { merge: true });
-                } catch (e2) {
-                    console.error("Fallback setDoc para dinero falló:", e2);
-                }
-            }
-        }
-        
-        // ... (getTimerDocRef, saveTimersState, setupTimerListener ... sin cambios)
-        function getTimerDocRef() {
-            return doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'guarantee_timers');
+        // ELIMINADO: setupTimerListener()
+
+        // --- MODIFICADO: Listeners y guardado de Mejoras (Boosts) ---
+        // ELIMINADO: getBoostsDocRef()
+
+        // MODIFICADO: Ahora usa localStorage
+        function saveBoostsState() {
+            const boosts = { 
+                luckMultiplier: luckMultiplier,
+                isFlying: isFlying,
+            };
+            localStorage.setItem('game_boosts', JSON.stringify(boosts));
         }
 
-        async function saveTimersState() {
-            if (!userId || !db) return;
-            try {
-                await setDoc(getTimerDocRef(), { 
-                    legendaryTimer: legendaryTimer,
-                    mythicTimer: mythicTimer,
-                }, { merge: true });
-            } catch (error) {
-                console.error("Error al guardar los temporizadores:", error);
-            }
-        }
-
-        function setupTimerListener() {
-            if (!db || !userId) return;
-            onSnapshot(getTimerDocRef(), (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    legendaryTimer = data.legendaryTimer || 0;
-                    mythicTimer = data.mythicTimer || 0;
-                } else {
-                    saveTimersState();
-                }
-            }, (error) => {
-                console.error("Error al escuchar los temporizadores:", error);
-            });
-        }
-
-        // ... (getBoostsDocRef, saveBoostsState, setupBoostsListener ... sin cambios)
-        function getBoostsDocRef() {
-            return doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'boost_state');
-        }
-
-        async function saveBoostsState() {
-            if (!userId || !db) return;
-            try {
-                await setDoc(getBoostsDocRef(), { 
-                    luckMultiplier: luckMultiplier,
-                    isFlying: isFlying,
-                }, { merge: true });
-            } catch (error) {
-                console.error("Error al guardar las mejoras:", error);
-            }
-        }
-
-        function setupBoostsListener() {
-            if (!db || !userId) return;
-            onSnapshot(getBoostsDocRef(), (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    luckMultiplier = data.luckMultiplier || 1;
-                    isFlying = data.isFlying || false;
-                } else {
-                    saveBoostsState();
-                }
-                updateShopUI();
-                toggleFlightControls(isFlying);
-            }, (error) => {
-                console.error("Error al escuchar las mejoras:", error);
-            });
-        }
+        // ELIMINADO: setupBoostsListener()
+        // --- FIN MODIFICADO ---
 
         // --- INVENTARIO DE BASE ---
-        function getInventoryDocRef() {
-            return doc(db, 'artifacts', appId, 'users', userId, 'player_data', 'base_inventory');
-        }
+        // ELIMINADO: getInventoryDocRef()
         
-        async function saveBaseInventory() {
-            if (!userId || !db) return;
+        // MODIFICADO: Ahora usa localStorage
+        function saveBaseInventory() {
             try {
-                // MODIFICADO: Ya no se guarda el timestamp de recolección
+                // Almacenar solo los datos esenciales de los slots
                 const serializableInventory = baseInventory.map(slot => ({
                     occupied: slot.occupied,
                     capsuleData: slot.capsuleData 
                 }));
-                await setDoc(getInventoryDocRef(), { slots: serializableInventory }, { merge: true });
+                localStorage.setItem('game_inventory', JSON.stringify(serializableInventory));
             } catch (error) {
-                console.error("Error al guardar el inventario de la base:", error);
+                console.error("Error al guardar el inventario en localStorage:", error);
             }
         }
 
-        function setupInventoryListener() {
-            if (!db || !userId) return;
-            onSnapshot(getInventoryDocRef(), (docSnap) => {
-                if (docSnap.exists()) {
-                    const savedSlots = docSnap.data().slots || [];
-                    
-                    for (let i = capsules.length - 1; i >= 0; i--) {
-                        if (capsules[i].userData.isPlaced) {
-                            scene.remove(capsules[i]);
-                            capsules.splice(i, 1);
-                        }
-                    }
+        // ELIMINADO: setupInventoryListener()
 
-                    // ELIMINADO: Limpieza de botones de recolección
+        // --- NUEVA FUNCIÓN: Carga todos los datos de localStorage al inicio ---
+        function loadGameData() {
+            console.log("Cargando datos desde localStorage...");
+            
+            // 1. Dinero
+            currentMoney = JSON.parse(localStorage.getItem('game_money')) || 100;
+            
+            // 2. Timers
+            const timers = JSON.parse(localStorage.getItem('game_timers')) || {};
+            legendaryTimer = timers.legendaryTimer || 0;
+            mythicTimer = timers.mythicTimer || 0;
+            
+            // 3. Boosts
+            const boosts = JSON.parse(localStorage.getItem('game_boosts')) || {};
+            luckMultiplier = boosts.luckMultiplier || 1;
+            isFlying = boosts.isFlying || false;
 
-                    savedSlots.forEach((savedSlot, index) => {
-                        if (index < baseInventory.length) {
-                            const oldLocalData = baseInventory[index].capsuleData;
-                            
-                            baseInventory[index].occupied = savedSlot.occupied;
-                            baseInventory[index].capsuleData = savedSlot.capsuleData;
-
-                            if (savedSlot.occupied && savedSlot.capsuleData) {
-                                
-                                // ELIMINADO: Lógica de 'lastCollectedTimestamp'
-
-                                // Crear y colocar la cápsula estática
-                                const slotPos = baseInventory[index].position;
-                                const capsuleMesh = createStaticCapsule(savedSlot.capsuleData);
-                                capsuleMesh.position.copy(slotPos);
-                                capsuleMesh.userData.isPlaced = true;
-                                capsuleMesh.userData.baseSlotIndex = index;
-                                scene.add(capsuleMesh);
-                                capsules.push(capsuleMesh);
-
-                                // ELIMINADO: Creación de MoneyLabel
-                                // ELIMINADO: Creación de CollectButton
-                            }
-                        }
-                    });
-                    
-                    calculateBaseDps();
-                    updateMoneyDisplay();
-
-                } else {
-                    saveBaseInventory();
+            // 4. Inventario (Solo carga datos, no 3D)
+            // baseInventory ya debería estar poblado con slots vacíos por init3DScene()
+            const savedSlots = JSON.parse(localStorage.getItem('game_inventory')) || [];
+            
+            savedSlots.forEach((savedSlot, index) => {
+                if (index < baseInventory.length) {
+                    baseInventory[index].occupied = savedSlot.occupied;
+                    baseInventory[index].capsuleData = savedSlot.capsuleData;
                 }
-            }, (error) => {
-                console.error("Error al escuchar el inventario:", error);
             });
-        }
-
-
-        async function setupFirebase() {
-            try {
-                const fb = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js");
-                const analyticsMod = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js");
-                const authMod = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js");
-                const fsMod = await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js");
-                
-                initializeApp = fb.initializeApp;
-                const getAnalytics = analyticsMod.getAnalytics; 
-                
-                getAuth = authMod.getAuth;
-                signInAnonymously = authMod.signInAnonymously;
-                signInWithCustomToken = authMod.signInWithCustomToken; 
-                onAuthStateChanged = authMod.onAuthStateChanged;
-                
-                getFirestore = fsMod.getFirestore;
-                doc = fsMod.doc;
-                setDoc = fsMod.setDoc;
-                onSnapshot = fsMod.onSnapshot;
-                serverTimestamp = fsMod.serverTimestamp; 
-                Timestamp = fsMod.Timestamp; 
-                updateDoc = fsMod.updateDoc; 
-                increment = fsMod.increment;
-                getDoc = fsMod.getDoc; // <-- AÑADIDO
-
-                fsMod.setLogLevel('Debug');
-                
-                const app = initializeApp(firebaseConfig);
-                const analytics = getAnalytics(app); 
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // MODIFICADO: Lógica de autenticación corregida para usar __initial_auth_token
-                const MAX_RETRIES = 5;
-                let delay = 1000; 
-                let successfulAuth = false;
-
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        console.log("Intentando signInWithCustomToken...");
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                        successfulAuth = true;
-                        console.log("Autenticación con Custom Token exitosa.");
-                    } else {
-                        console.warn("Token de autenticación no definido. Intentando signInAnonymously...");
-                        // Bucle de reintento para anónimo (para pruebas locales)
-                        for (let i = 0; i < MAX_RETRIES; i++) {
-                            try {
-                                await signInAnonymously(auth);
-                                successfulAuth = true;
-                                console.log("Autenticación anónima exitosa.");
-                                break; 
-                            } catch (error) {
-                                console.warn(`Intento de autenticación anónima ${i + 1} fallido:`, error.message);
-                                if (i === MAX_RETRIES - 1) throw error; // Lanzar el último error
-                                await new Promise(resolve => setTimeout(resolve, delay));
-                                delay *= 2; 
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error durante la autenticación:", error);
-                    document.getElementById('loading-text').innerHTML = "Error de autenticación. Revisa la consola.";
-                    return; // No continuar si la autenticación falla
-                }
-                
-                if (!successfulAuth) {
-                     throw new Error("Autenticación fallida después de múltiples reintentos.");
-                }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) { 
-                        userId = user.uid; 
-                        console.log("Usuario autenticado, UID:", userId);
-                    } else { 
-                        userId = 'anon-' + crypto.randomUUID(); 
-                        console.warn("No hay usuario, usando UID temporal:", userId);
-                    }
-                    
-                    // --- MODIFICADO: Flujo de inicio ---
-                    // En lugar de iniciar el juego, mostramos el lobby
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('lobby-container').style.display = 'flex';
-                    
-                    // Configurar listeners del lobby
-                    document.getElementById('btn-create-room').addEventListener('click', handleCreateRoom);
-                    document.getElementById('btn-join-room').addEventListener('click', handleJoinRoom);
-                    
-                    /* ELIMINADO: El juego ya no se carga aquí
-                    loadAllAssets().then(() => { 
-                        init3DScene();
-                        setupBaseStateListeners(); 
-                        setupMoneyListener(); 
-                        setupTimerListener(); 
-                        setupInventoryListener(); 
-                        setupBoostsListener(); 
-                        animate();
-                    });
-                    */
-                });
-
-            } catch (error) {
-                console.error("Error al configurar Firebase:", error);
-                let userErrorMessage = "Error al cargar el servicio de autenticación. Consulta la consola.";
-                if (error.code === 'auth/configuration-not-found') {
-                    userErrorMessage = `... (mensaje de error de config no encontrada) ...`; // Mantenido
-                }
-                document.getElementById('loading-text').innerHTML = userErrorMessage;
-            }
+            
+            console.log("Datos cargados.");
         }
         
-        // =========================================================
-        // 4. NUEVA LÓGICA DE LOBBY Y SALAS
-        // =========================================================
-
-        function showErrorToast(message) {
-            const toast = document.getElementById('error-toast');
-            if (!toast) return;
-            toast.textContent = message;
-            toast.style.bottom = '20px'; // Mostrar
-            setTimeout(() => {
-                toast.style.bottom = '-100px'; // Ocultar
-            }, 3000);
-        }
-
-        function generateRoomCode() {
-            return Math.random().toString(36).substring(2, 7).toUpperCase();
-        }
-
-        function getRoomRef(roomId) {
-            return doc(db, 'artifacts', appId, 'public', 'data', 'rooms', roomId);
-        }
-
-        async function handleCreateRoom() {
-            const playerName = document.getElementById('player-name-input').value.trim();
-            if (!playerName) {
-                showErrorToast("Por favor, ingresa un nombre.");
-                return;
-            }
-
-            currentRoomId = generateRoomCode();
-            playerBaseId = ALL_BASE_IDS[0]; // El host obtiene la primera base
-            
-            allPlayers = {
-                [userId]: {
-                    name: playerName,
-                    baseId: playerBaseId
+        // --- NUEVA FUNCIÓN: Reconstruye la base 3D a partir de los datos cargados ---
+        function rebuildBaseFromInventory() {
+            // Limpiar cápsulas 3D existentes (por si acaso)
+            for (let i = capsules.length - 1; i >= 0; i--) {
+                if (capsules[i].userData.isPlaced) {
+                    scene.remove(capsules[i]);
+                    capsules.splice(i, 1);
                 }
-            };
-
-            const roomData = {
-                roomId: currentRoomId,
-                hostId: userId,
-                createdAt: serverTimestamp(),
-                players: allPlayers,
-                gameStarted: false // Podríamos usar esto más adelante
-            };
-
-            try {
-                await setDoc(getRoomRef(currentRoomId), roomData);
-                await startGameAndListen(currentRoomId);
-            } catch (error) {
-                console.error("Error al crear la sala:", error);
-                showErrorToast("Error al crear la sala.");
-            }
-        }
-
-        async function handleJoinRoom() {
-            const playerName = document.getElementById('player-name-input').value.trim();
-            const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
-
-            if (!playerName) {
-                showErrorToast("Por favor, ingresa un nombre.");
-                return;
-            }
-            if (!roomCode) {
-                showErrorToast("Por favor, ingresa un código de sala.");
-                return;
             }
 
-            const roomRef = getRoomRef(roomCode);
-            let roomSnap;
-            try {
-                roomSnap = await getDoc(roomRef);
-            } catch (error) {
-                console.error("Error al buscar la sala:", error);
-                showErrorToast("Error al buscar la sala.");
-                return;
-            }
-
-            if (!roomSnap.exists()) {
-                showErrorToast("Sala no encontrada. Verifica el código.");
-                return;
-            }
-
-            const roomData = roomSnap.data();
-            const numPlayers = Object.keys(roomData.players).length;
-
-            if (numPlayers >= ALL_BASE_IDS.length) {
-                showErrorToast("La sala está llena.");
-                return;
-            }
-            
-            // Asignar la siguiente base disponible
-            playerBaseId = ALL_BASE_IDS[numPlayers];
-            allPlayers = roomData.players;
-            allPlayers[userId] = { name: playerName, baseId: playerBaseId };
-
-            try {
-                // Actualizar solo la parte de 'players' del documento
-                await updateDoc(roomRef, {
-                    [`players.${userId}`]: { name: playerName, baseId: playerBaseId }
-                });
-                
-                currentRoomId = roomCode;
-                await startGameAndListen(currentRoomId);
-
-            } catch (error) {
-                console.error("Error al unirse a la sala:", error);
-                showErrorToast("Error al unirse a la sala.");
-            }
-        }
-
-        function updatePlayerListUI() {
-            const listElement = document.querySelector("#player-list-display ul");
-            if (!listElement) return;
-            
-            listElement.innerHTML = ""; // Limpiar lista
-            for (const id in allPlayers) {
-                const player = allPlayers[id];
-                const li = document.createElement("li");
-                
-                // Marcar al jugador local
-                const isMe = (id === userId) ? " (Tú)" : "";
-                
-                li.textContent = `${player.name}${isMe} - ${player.baseId}`;
-                listElement.appendChild(li);
-            }
-        }
-
-        async function startGameAndListen(roomId) {
-            // 1. Ocultar Lobby, Mostrar Carga
-            document.getElementById('lobby-container').style.display = 'none';
-            const loadingScreen = document.getElementById('loading');
-            const loadingText = document.getElementById('loading-text');
-            loadingText.textContent = "Cargando recursos del juego...";
-            loadingScreen.style.display = 'flex';
-
-            // 2. Mostrar UI de la Sala (código y jugadores)
-            document.getElementById('room-info-container').style.display = 'block';
-            document.getElementById('room-code-display').textContent = `Sala: ${roomId}`;
-            updatePlayerListUI(); // Mostrar lista inicial
-
-            // 3. Escuchar cambios en la sala (nuevos jugadores)
-            if (roomListenerUnsubscribe) roomListenerUnsubscribe(); // Detener listener anterior
-            
-            roomListenerUnsubscribe = onSnapshot(getRoomRef(roomId), (doc) => {
-                if (doc.exists()) {
-                    const roomData = doc.data();
-                    allPlayers = roomData.players;
-                    updatePlayerListUI();
-                    
-                    // --- FUTURO: Aquí es donde actualizarías las posiciones de otros jugadores ---
-                    // updateOtherPlayerAvatars(allPlayers);
-                } else {
-                    // La sala fue eliminada (ej. host se fue)
-                    // TODO: Manejar la salida de la sala
-                    console.warn("La sala ya no existe.");
-                    showErrorToast("La sala fue cerrada.");
-                    // Aquí deberíamos recargar la página o volver al lobby
-                    location.reload(); 
+            // Recorrer el inventario cargado
+            baseInventory.forEach((slot, index) => {
+                if (slot.occupied && slot.capsuleData) {
+                    // Crear y colocar la cápsula estática
+                    const slotPos = slot.position;
+                    const capsuleMesh = createStaticCapsule(slot.capsuleData);
+                    capsuleMesh.position.copy(slotPos);
+                    capsuleMesh.userData.isPlaced = true;
+                    capsuleMesh.userData.baseSlotIndex = index;
+                    scene.add(capsuleMesh);
+                    capsules.push(capsuleMesh);
                 }
             });
+            
+            // Calcular DPS total después de cargar
+            calculateBaseDps();
+            // updateMoneyDisplay() será llamado después en initializeGame
+        }
 
-            // 4. Cargar y Iniciar el Juego 3D
+
+        // --- MODIFICADO: Función de inicialización principal ---
+        async function initializeGame() {
             try {
+                document.getElementById('loading').innerHTML = '<div class="text-white p-4 rounded-lg bg-indigo-600 shadow-xl">Cargando assets...</div>';
+                
+                // 1. Cargar assets 3D
                 await loadAllAssets();
                 
-                // Mostrar la escena 3D
-                document.getElementById('scene-container').style.display = 'block';
+                // 2. Inicializar escena (crea slots vacíos en baseInventory)
+                init3DScene(); 
 
-                init3DScene(); // Ahora usa playerBaseId
+                document.getElementById('loading').innerHTML = '<div class="text-white p-4 rounded-lg bg-indigo-600 shadow-xl">Cargando datos locales...</div>';
+
+                // 3. Cargar datos de localStorage (puebla baseInventory)
+                loadGameData(); 
+
+                // 4. Reconstruir base 3D a partir de los datos
+                rebuildBaseFromInventory(); 
                 
-                // Configurar todos los listeners del juego
-                setupBaseStateListeners(); // Ahora usa ALL_BASE_IDS
-                setupMoneyListener(); 
-                setupTimerListener(); 
-                setupInventoryListener(); // Ya es específico del userId
-                setupBoostsListener(); // Específico del userId
+                // 5. Actualizar UI inicial
+                updateMoneyDisplay();
+                updateShopUI();
+                toggleFlightControls(isFlying);
                 
+                document.getElementById('loading').style.display = 'none';
+
+                // 6. Iniciar bucle
                 animate();
 
-                // 5. Ocultar la pantalla de carga
-                loadingScreen.style.display = 'none';
-
             } catch (error) {
-                console.error("Error al cargar los assets 3D:", error);
-                loadingText.textContent = "Error al cargar assets. Refresca la página.";
+                console.error("Error al inicializar el juego:", error);
+                document.getElementById('loading').innerHTML = "Error al cargar. Revisa la consola.";
             }
         }
         
         // =========================================================
-        // 5. LÓGICA DE LA PUERTA (Base)
+        // 5. LÓGICA DE LA PUERTA (Base) - (ELIMINADA)
         // =========================================================
 
-        function getBaseDocRef(baseId) {
-            return doc(db, 'artifacts', appId, 'public', 'data', 'base_state', baseId);
-        }
-
-        // --- MANEJO DEL BOTÓN DE LA BASE ---
-        async function handleBaseButtonPress(baseId) {
-            if (!userId || !db || !Timestamp) return;
-
-            const laserGrid = baseLaserGrids[baseId];
-            if (!laserGrid || laserGrid.userData.isClosed) return; 
-
-            const now = Timestamp.now();
-            const reOpenTime = new Timestamp(now.seconds + 60, now.nanoseconds);
-            setLaserGridVisualState(baseId, true, userId, reOpenTime);
-
-            try {
-                await setDoc(getBaseDocRef(baseId), { 
-                    isClosed: true, 
-                    closedByUserId: userId, 
-                    reOpenTime: reOpenTime 
-                }, { merge: true });
-            } catch (error) {
-                console.error("Error al cerrar la base:", error);
-                setLaserGridVisualState(baseId, false, null, null);
-            }
-        }
-
-        // --- LISTENER PARA TODAS LAS BASES ---
-        function setupBaseStateListeners() {
-            if (!db) {
-                 console.warn("setupBaseStateListeners llamado antes de que db esté inicializado.");
-                 setTimeout(setupBaseStateListeners, 1000); 
-                 return;
-            }
-            
-            // MODIFICADO: Itera sobre la lista estática de todas las bases
-            ALL_BASE_IDS.forEach(baseId => {
-                onSnapshot(getBaseDocRef(baseId), (docSnap) => {
-                    let isClosed = false, closedByUserId = null, reOpenTime = null;
-
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        isClosed = data.isClosed || false;
-                        closedByUserId = data.closedByUserId || null;
-                        reOpenTime = data.reOpenTime || null;
-                        
-                        if (isClosed && reOpenTime && Timestamp.now().seconds >= reOpenTime.seconds) {
-                            isClosed = false;
-                            closedByUserId = null;
-                            reOpenTime = null;
-                            
-                             if (userId === data.closedByUserId) { 
-                                 (async () => {
-                                     try {
-                                        await setDoc(getBaseDocRef(baseId), { isClosed: false, closedByUserId: null, reOpenTime: null }, { merge: true });
-                                     } catch (e) {}
-                                 })();
-                             }
-                        }
-
-                    } else {
-                        (async () => {
-                             try {
-                                await setDoc(getBaseDocRef(baseId), { isClosed: false, closedByUserId: null, reOpenTime: null }, { merge: true });
-                             } catch(e) {}
-                        })();
-                    }
-                    
-                    setLaserGridVisualState(baseId, isClosed, closedByUserId, reOpenTime);
-
-                }, (error) => {
-                    console.error(`Error al escuchar la base ${baseId}:`, error);
-                });
-            });
-        }
-        
-        // --- ACTUALIZACIÓN VISUAL ---
-        function setLaserGridVisualState(baseId, isClosed, closedByUserId, reOpenTime) {
-            const laserGrid = baseLaserGrids[baseId];
-            if (!laserGrid) return;
-
-            laserGrid.visible = isClosed;
-            laserGrid.userData.isClosed = isClosed;
-            laserGrid.userData.closedByUserId = closedByUserId;
-            laserGrid.userData.reOpenTime = reOpenTime; 
-            laserGrid.userData.isReopening = false; 
-
-            updateStructureBounds(); 
-        }
+        // ELIMINADO: getBaseDocRef()
+        // ELIMINADO: handleBaseButtonPress()
+        // ELIMINADO: setupBaseStateListeners()
+        // ELIMINADO: setLaserGridVisualState()
         
         // =========================================================
         // 6. THREE.JS: SETUP Y GEOMETRÍA
         // =========================================================
         
-        // ... (registerCollisionBounds, updateStructureBounds, drawTimerCanvas ... sin cambios)
         function registerCollisionBounds(mesh, width, height, depth, isPermanent = false, type = 'Caseta') {
             const x = mesh.position.x;
             const y = mesh.position.y;
@@ -1561,25 +1140,18 @@
             staticStructureBounds.forEach(bound => structureBounds.push(bound));
             permanentCasetaBounds.forEach(bound => structureBounds.push(bound));
 
-            // AÑADIR LÁSERES ACTIVOS A LAS COLISIONES
-            // MODIFICADO: Itera sobre la lista global
-            for (const baseId of ALL_BASE_IDS) {
-                const laserGrid = baseLaserGrids[baseId];
-                const laserBound = baseLaserBounds[baseId];
-
-                if (laserGrid && laserBound && laserGrid.userData.isClosed) {
-                    if (laserGrid.userData.closedByUserId !== userId) {
-                        structureBounds.push(laserBound);
-                    }
-                }
-            }
+            // ELIMINADO: Bucle de colisión de láser
         }
         
+        // --- Canvas para Textura 3D del Temporizador ---
         function drawTimerCanvas() {
             if (!timerCanvas || !timerContext) return;
+            
             const canvasWidth = timerCanvas.width;
             const canvasHeight = timerCanvas.height;
             timerContext.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Fondo y Borde... (misma lógica que antes)
             timerContext.fillStyle = '#1f2937'; 
             timerContext.fillRect(0, 0, canvasWidth, canvasHeight);
             timerContext.strokeStyle = '#6b7280';
@@ -1618,9 +1190,27 @@
             lastTimerUpdate = Date.now();
         }
 
-        // --- ELIMINADO: createCollectButton() ---
+        // --- NUEVO: Botón de Recolección de Dinero ---
+        /* ELIMINADO: Ya no se crea este botón
+        function createCollectButton() {
+            const buttonGeom = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 16);
+            // Material verde brillante
+            const buttonMat = new THREE.MeshPhongMaterial({ 
+                color: 0x10b981, 
+                emissive: 0x10b981, 
+                emissiveIntensity: 0.6,
+                shininess: 80
+            });
+            const buttonMesh = new THREE.Mesh(buttonGeom, buttonMat);
+            buttonMesh.userData = { 
+                type: 'CollectButton', 
+                baseSlotIndex: -1 // Se asignará al colocarlo
+            };
+            buttonMesh.castShadow = true;
+            return buttonMesh;
+        }
+        */
 
-        // ... (loadFont, loadModels, loadAllAssets ... sin cambios)
         function loadFont() {
             return new Promise((resolve, reject) => {
                 const loader = new THREE.FontLoader();
@@ -1643,6 +1233,7 @@
         function loadModels() {
             gltfLoader = new THREE.GLTFLoader();
             const modelPromises = [];
+
             CHARACTER_DATA.forEach(char => {
                 if (char.modelFile) {
                     const promise = new Promise((resolve, reject) => {
@@ -1652,16 +1243,19 @@
                             resolve();
                         }, undefined, (error) => {
                             console.error(`Error cargando modelo ${char.modelFile}:`, error);
-                            resolve(); 
+                            resolve(); // Resolvemos igualmente para no bloquear la carga
                         });
                     });
                     modelPromises.push(promise);
                 }
             });
+            
+            // Usamos Promise.allSettled para que un modelo fallido no detenga toda la carga
             return Promise.allSettled(modelPromises);
         }
 
         async function loadAllAssets() {
+            // Cargamos fuente y modelos en paralelo
             await Promise.all([
                 loadFont(),
                 loadModels()
@@ -1760,8 +1354,14 @@
             createSegment(centralCarpetWidth, carpetThickness, groundDepth, 0, carpetThickness / 2 + 0.01, 0, carpetMaterial, false, 'Carpet'); 
 
             // Agujeros
+            // --- CORRECCIÓN DE ERROR ---
+            // El tamaño (holeSize) se reduce de 10 a 8.
+            // Con tamaño 10, el 'playerRadius' (de 1) hacía que la zona de "teleport"
+            // del agujero tocara la zona de colisión de la base, bloqueando la entrada.
+            // Reducir el tamaño a 8 crea un espacio seguro de 1m a cada lado.
             const holeSize = 8;
             const holeDepth = 0.2;
+            // Las posiciones (-11 y 11) están correctas, centran el agujero en el hueco.
             const holePositions = [{ x: -11, z: -25 }, { x: 11, z: -25 }];
             holePositions.forEach(pos => {
                 const holeMesh = new THREE.Mesh(new THREE.BoxGeometry(holeSize, holeDepth, holeSize), holeMaterial);
@@ -1777,40 +1377,51 @@
             const casetaXOffset = centralCarpetWidth / 2 + structureCubeSize / 2 + 10; 
             const casetaZPositions = [-25, 0, 25]; 
 
-            // MODIFICADO: Añadido 'id' como argumento
-            function createSlotVisuals(baseX, baseZ, id) {
+            function createSlotVisuals(baseX, baseZ) {
+                // MODIFICADO: El material ahora es verde y opaco para el pad de colección
+                // const slotMaterial = new THREE.MeshPhongMaterial({ color: 0x22c55e, shininess: 10 }); 
+                // const slotGeom = new THREE.PlaneGeometry(4, 4); 
+                
+                // --- MODIFICACIÓN: Pads más visibles ---
                 const slotMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0x32cd32, 
+                    color: 0x32cd32, // Verde lima
                     shininess: 100, 
-                    emissive: 0x32cd32, 
-                    emissiveIntensity: 0.6, 
+                    emissive: 0x32cd32, // Que emita luz verde
+                    emissiveIntensity: 0.6, // Intensidad del brillo
                     transparent: true,
                     opacity: 0.7
                 });
-                const slotGeom = new THREE.BoxGeometry(4, 0.2, 4); 
+                const slotGeom = new THREE.BoxGeometry(4, 0.2, 4); // Geometría de caja (ligeramente elevada)
+                // --- FIN MODIFICACIÓN ---
                 
-                // MODIFICADO: Comprueba si esta es la base del jugador actual
-                if (id === playerBaseId) {
+                // Inicializar el inventario de slots para esta base
+                if (baseX === -casetaXOffset && baseZ === casetaZPositions[0]) {
                     playerBasePosition.set(baseX, 0, baseZ); 
                     
-                    baseInventory = BASE_SLOT_OFFSETS.map((offset, index) => { 
+                    // MODIFICADO: Se guarda el 'padMesh' y 'isCollecting'
+                    baseInventory = BASE_SLOT_OFFSETS.map((offset, index) => { // Añadido 'index'
                         const x = baseX + offset.x;
                         const y = sceneProps.capsuleHeight / 2 + 0.05; 
                         const z = baseZ + offset.z;
                         
+                        // Visual de Slot (Ahora es el Pad de Colección Verde)
                         const slotMesh = new THREE.Mesh(slotGeom, slotMaterial);
-                        slotMesh.position.set(x, 0.1, z); 
-                        slotMesh.userData.slotIndex = index; 
-                        slotMesh.receiveShadow = true; 
+                        // slotMesh.rotation.x = -Math.PI / 2; // ELIMINADO: Ya no es un plano
+                        slotMesh.position.set(x, 0.1, z); // MODIFICADO: y = 0.1 (mitad de la altura 0.2)
+                        slotMesh.userData.slotIndex = index; // AÑADIDO: Guardar índice para referencia
+                        slotMesh.receiveShadow = true; // El pad recibe sombras
                         scene.add(slotMesh);
  
-                        // ELIMINADO: slotCollectionState
+                        // NUEVO: Inicializar el estado de recolección para este slot
+                        // ELIMINADO: slotCollectionState ya no se usa
+                        // slotCollectionState[index] = { isCollecting: false };
 
                         return {
                             occupied: false,
                             capsuleData: null,
-                            position: new THREE.Vector3(x, y, z), 
-                            padMesh: slotMesh, 
+                            position: new THREE.Vector3(x, y, z), // Posición de la cápsula
+                            padMesh: slotMesh, // AÑADIDO: Referencia al pad 3D
+                            // isCollecting: false // ELIMINADO: Se movió a slotCollectionState
                         };
                     });
                 }
@@ -1821,61 +1432,42 @@
                 const thickness = 0.5; 
                 const centerWallY = halfSize; 
                 
+                // Techo y Suelo
                 createSegment(structureCubeSize, thickness, structureCubeSize, x, structureCubeSize - thickness / 2, z, simpleCubeMaterial, true);
                 createSegment(structureCubeSize, thickness, structureCubeSize, x, thickness / 2, z, simpleCubeMaterial, true);
+
+                // Paredes Fijas (Norte y Sur interiores)
                 createSegment(structureCubeSize, structureCubeSize, thickness, x, centerWallY, z + halfSize - thickness / 2, simpleCubeMaterial, true); 
                 createSegment(structureCubeSize, structureCubeSize, thickness, x, centerWallY, z - halfSize + thickness / 2, simpleCubeMaterial, true); 
                 
+                // Pared Lateral Exterior (Oeste o Este)
                 const sideX = isLeft ? x - halfSize + thickness / 2 : x + halfSize - thickness / 2;
                 createSegment(thickness, structureCubeSize, structureCubeSize, sideX, centerWallY, z, simpleCubeMaterial, true);
 
-                // --- Lógica de Láser y Botón ---
-                BASE_IDS.push(id); // Puebla la lista de IDs de base
-
+                // --- LÓGICA DE LÁSER Y BOTÓN ELIMINADA ---
+                
+                // Pared Lateral Interior (Entrada) - AHORA ES SÓLIDA
                 const entranceX = isLeft ? x + halfSize - thickness / 2 : x - halfSize + thickness / 2;
-                const entranceY = centerWallY;
-                const entranceZ = z;
+                createSegment(thickness, structureCubeSize, structureCubeSize, entranceX, centerWallY, z, simpleCubeMaterial, true);
 
-                // 1. Rejilla de Láser
-                const laserMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.7 });
-                const laserGeom = new THREE.CylinderGeometry(0.05, 0.05, structureCubeSize, 8);
-                const laserGrid = new THREE.Group();
-                laserGrid.position.set(entranceX, entranceY, entranceZ);
-                const laserCount = 10;
-                for (let i = 0; i < laserCount; i++) {
-                    const laser = new THREE.Mesh(laserGeom, laserMaterial);
-                    const zPos = -halfSize + (structureCubeSize / (laserCount - 1)) * i;
-                    laser.position.z = zPos;
-                    laserGrid.add(laser);
+
+                // Puerta (solo para la base del jugador)
+                if (id === BASE_ID) {
+                    // La lógica de la puerta física se ha eliminado
+                    // ... pero la lógica de los slots se mantiene
+                    
+                    // 7. Visuales de slots (Solo para la base del jugador)
+                    createSlotVisuals(x, z);
                 }
-                laserGrid.visible = false;
-                laserGrid.userData = { isClosed: false, closedByUserId: null, reOpenTime: null };
-                scene.add(laserGrid);
-                baseLaserGrids[id] = laserGrid;
-
-                // 2. Límites de Colisión del Láser
-                baseLaserBounds[id] = registerCollisionBounds(laserGrid, 0.5, structureCubeSize, structureCubeSize, false, 'Laser');
-
-                // 3. Botón de Cierre
-                const buttonMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-                const buttonGeom = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16);
-                const buttonMesh = new THREE.Mesh(buttonGeom, buttonMaterial);
-                buttonMesh.position.set(x, thickness + 0.05, z + halfSize - 2); 
-                buttonMesh.userData = { type: 'BaseButton', baseId: id };
-                scene.add(buttonMesh);
-                baseButtons[id] = buttonMesh;
-
-                // MODIFICADO: Llamada a createSlotVisuals para CADA estructura
-                createSlotVisuals(x, z, id);
             }
 
-            // Creación de 6 casetas (usando la lista global)
-            createStructure(-casetaXOffset, casetaZPositions[0], true, ALL_BASE_IDS[0]); 
-            createStructure(casetaXOffset, casetaZPositions[0], false, ALL_BASE_IDS[1]);
-            createStructure(-casetaXOffset, casetaZPositions[1], true, ALL_BASE_IDS[2]);
-            createStructure(casetaXOffset, casetaZPositions[1], false, ALL_BASE_IDS[3]);
-            createStructure(-casetaXOffset, casetaZPositions[2], true, ALL_BASE_IDS[4]);
-            createStructure(casetaXOffset, casetaZPositions[2], false, ALL_BASE_IDS[5]);
+            // Creación de 6 casetas
+            createStructure(-casetaXOffset, casetaZPositions[0], true, BASE_ID); 
+            createStructure(-casetaXOffset, casetaZPositions[1], true, 'base_2_left');
+            createStructure(-casetaXOffset, casetaZPositions[2], true, 'base_3_left');
+            createStructure(casetaXOffset, casetaZPositions[0], false, 'base_1_right');
+            createStructure(casetaXOffset, casetaZPositions[1], false, 'base_2_right');
+            createStructure(casetaXOffset, casetaZPositions[2], false, 'base_3_right');
 
             updateStructureBounds(); 
 
@@ -1896,6 +1488,7 @@
 
             scene.add(directionalLight);
             
+            // Controles de cámara fijos para una vista en primera persona
             controls = new THREE.OrbitControls(camera, renderer.domElement); 
             controls.enableDamping = true; 
             controls.dampingFactor = 0.05;
@@ -1908,6 +1501,11 @@
             controls.target.set(initialLookAt.x, initialLookAt.y, initialLookAt.z); 
             controls.update();
 
+            // --- NUEVO: Poblar menús ---
+            populateCharacterIndex();
+            populateAdminProbs();
+            // --- FIN NUEVO ---
+
             setupEventListeners();
         }
 
@@ -1918,17 +1516,31 @@
             window.addEventListener('resize', onWindowResize, false);
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
+            // interactionButtonBase.addEventListener('click', toggleDoorState); // Eliminado
             setupTouchControls();
             setupBuyInteraction();
-            setupSellInteraction(); 
-            setupShopListeners(); 
+            setupSellInteraction(); // Nuevo setup de venta
+            setupShopListeners(); // NUEVO
+            setupIndexListeners(); // NUEVO
+            setupAdminProbsListeners(); // NUEVO
 
+            // --- NUEVO: Botón Admin Block ---
             const buyAdminBlockBtn = document.getElementById('buy-admin-block');
             if(buyAdminBlockBtn) {
                 buyAdminBlockBtn.addEventListener('click', buyAdminBlock);
             }
+            // --- FIN NUEVO ---
             
-            // ELIMINADO: Listener del botón Reclamar Todo
+            // --- NUEVO: Botón Reclamar Todo ---
+            // REQ: Revertido a un click instantáneo
+            /* ELIMINADO: El botón ya no existe
+            if (collectAllButton) {
+                // REQ: Llama a executeCollection, que es la lógica de recolección instantánea
+                collectAllButton.addEventListener('click', executeCollection);
+            }
+            */
+            // setupCollectionInteraction(); // REQ: ELIMINADO (ya no es hold-to-press)
+            // --- FIN NUEVO ---
         }
 
         function onWindowResize() {
@@ -1945,6 +1557,7 @@
                 case 'KeyA': case 'ArrowLeft': moveState.left = true; break;
                 case 'KeyS': case 'ArrowDown': moveState.backward = true; break; 
                 case 'KeyD': case 'ArrowRight': moveState.right = true; break;
+                // NUEVO: Controles de vuelo con teclado
                 case 'Space': if (isFlying) moveState.up = true; break;
                 case 'ShiftLeft': if (isFlying) moveState.down = true; break;
             }
@@ -1956,6 +1569,7 @@
                 case 'KeyA': case 'ArrowLeft': moveState.left = false; break;
                 case 'KeyS': case 'ArrowDown': moveState.backward = false; break;
                 case 'KeyD': case 'ArrowRight': moveState.right = false; break;
+                // NUEVO: Controles de vuelo con teclado
                 case 'Space': moveState.up = false; break;
                 case 'ShiftLeft': moveState.down = false; break;
             }
@@ -1965,15 +1579,17 @@
             const buttons = [
                 { id: 'btn-forward', move: 'forward' }, { id: 'btn-backward', move: 'backward' },
                 { id: 'btn-left', move: 'left' }, { id: 'btn-right', move: 'right' },
+                // NUEVO: Controles de vuelo táctiles
                 { id: 'btn-fly-up', move: 'up' }, { id: 'btn-fly-down', move: 'down' }
             ];
 
             buttons.forEach(({ id, move }) => {
                 const btn = document.getElementById(id);
-                if (!btn) return; // Asegurarse de que el botón exista
                 const setMoveState = (value) => { moveState[move] = value; };
+
                 const handleStart = (e) => { e.preventDefault(); setMoveState(true); };
                 const handleEnd = (e) => { e.preventDefault(); setMoveState(false); };
+
                 btn.addEventListener('mousedown', handleStart);
                 btn.addEventListener('mouseup', handleEnd);
                 btn.addEventListener('mouseleave', handleEnd); 
@@ -1988,16 +1604,13 @@
                 e.preventDefault(); 
                 const availableSlotIndex = baseInventory.findIndex(slot => !slot.occupied);
                 
-                // MODIFICADO: Chequea el dinero real (base + acumulado)
-                const currentTotalMoney = currentMoney + moneyAccumulator;
-
-                if (targetCapsule && currentTotalMoney >= targetCapsule.userData.cost && availableSlotIndex !== -1) { 
+                if (targetCapsule && currentMoney >= targetCapsule.userData.cost && availableSlotIndex !== -1) { 
                     isBuying = true;
                 } else if (availableSlotIndex === -1) {
                     purchaseTip.textContent = `¡Base llena! Haz espacio para comprar.`;
                     purchaseUI.style.opacity = '1';
                 } else if (targetCapsule) {
-                    purchaseTip.textContent = `¡Faltan $${formatLargeNumber(targetCapsule.userData.cost - currentTotalMoney)} para comprar!`;
+                    purchaseTip.textContent = `¡Faltan $${formatLargeNumber(targetCapsule.userData.cost - currentMoney)} para comprar!`;
                     purchaseUI.style.opacity = '1';
                 }
             };
@@ -2038,50 +1651,53 @@
             sellButton.addEventListener('touchcancel', handleEnd, { passive: false });
         }
         
-        // --- Lógica de la Tienda ---
+        // --- NUEVO: Lógica de la Tienda ---
         function toggleShopMenu(show) {
             shopMenu.style.display = show ? 'flex' : 'none';
+            // Opcional: Pausar el juego o bloquear controles de cámara
             if (controls) {
                 controls.enabled = !show;
             }
         }
 
         function updateShopUI() {
-            if (!buyLuck2Btn) return; 
+            if (!buyLuck2Btn) return; // Asegurarse que la UI esté cargada
 
-            // MODIFICADO: Chequea el dinero real (base + acumulado)
-            const currentTotalMoney = currentMoney + moneyAccumulator;
-
-            buyLuck2Btn.disabled = luckMultiplier >= 2 || currentTotalMoney < LUCK_PRICES[2];
-            buyLuck4Btn.disabled = luckMultiplier >= 4 || currentTotalMoney < LUCK_PRICES[4];
-            buyLuck6Btn.disabled = luckMultiplier >= 6 || currentTotalMoney < LUCK_PRICES[6];
+            // Actualizar botones de Suerte
+            buyLuck2Btn.disabled = luckMultiplier >= 2 || currentMoney < LUCK_PRICES[2];
+            buyLuck4Btn.disabled = luckMultiplier >= 4 || currentMoney < LUCK_PRICES[4];
+            buyLuck6Btn.disabled = luckMultiplier >= 6 || currentMoney < LUCK_PRICES[6];
+            
             buyLuck2Btn.textContent = luckMultiplier >= 2 ? 'Comprado' : 'Comprar';
             buyLuck4Btn.textContent = luckMultiplier >= 4 ? 'Comprado' : 'Comprar';
             buyLuck6Btn.textContent = luckMultiplier >= 6 ? 'Comprado' : 'Comprar';
 
-            buyCarpetBtn.disabled = isFlying || currentTotalMoney < CARPET_PRICE;
+            // Actualizar botón de Alfombra
+            buyCarpetBtn.disabled = isFlying || currentMoney < CARPET_PRICE;
             buyCarpetBtn.textContent = isFlying ? 'Comprado' : 'Comprar';
 
+            // --- NUEVO: Actualizar botón Admin Block ---
             const buyAdminBlockBtn = document.getElementById('buy-admin-block');
             if (buyAdminBlockBtn) {
-                buyAdminBlockBtn.disabled = currentTotalMoney < ADMIN_BLOCK_PRICE;
+                buyAdminBlockBtn.disabled = currentMoney < ADMIN_BLOCK_PRICE;
             }
+            // --- FIN NUEVO ---
         }
 
-        async function buyBoost(type, value) {
+        // MODIFICADO: Eliminado 'async' y 'await'
+        function buyBoost(type, value) {
             let price = 0;
             let canBuy = false;
-            const currentTotalMoney = currentMoney + moneyAccumulator;
 
             if (type === 'luck') {
                 price = LUCK_PRICES[value];
-                if (currentTotalMoney >= price && luckMultiplier < value) {
+                if (currentMoney >= price && luckMultiplier < value) {
                     luckMultiplier = value;
                     canBuy = true;
                 }
             } else if (type === 'fly') {
                 price = CARPET_PRICE;
-                if (currentTotalMoney >= price && !isFlying) {
+                if (currentMoney >= price && !isFlying) {
                     isFlying = true;
                     canBuy = true;
                 }
@@ -2089,16 +1705,19 @@
 
             if (canBuy) {
                 updateShopUI();
-                toggleFlightControls(isFlying); 
+                toggleFlightControls(isFlying); // Activar controles si se compró
 
+                // Mostrar feedback
                 purchaseText.textContent = `¡Mejora Comprada!`;
                 purchaseTip.textContent = `Pagaste $${formatLargeNumber(price)}`;
                 purchaseUI.style.opacity = '1';
                 setTimeout(() => { purchaseUI.style.opacity = '0'; }, 2000);
 
-                await updateMoneyBalance(-price); // Modificado
-                await saveBoostsState();
+                // Guardar en localStorage
+                updateMoneyBalance(-price); // Esto actualiza dinero y guarda
+                saveBoostsState();
             } else {
+                // Feedback de fondos insuficientes
                 purchaseText.textContent = `Fondos Insuficientes`;
                 purchaseTip.textContent = `Necesitas $${formatLargeNumber(price)}`;
                 purchaseUI.style.opacity = '1';
@@ -2116,20 +1735,171 @@
             buyCarpetBtn.addEventListener('click', () => buyBoost('fly', true));
         }
         
-        // --- ELIMINADO: setupCollectionInteraction() ---
+        // --- NUEVO: Lógica del Índice ---
+        function toggleIndexMenu(show) {
+            // Aplica el mismo estilo que el shop-menu
+            indexMenu.style.display = show ? 'flex' : 'none';
+            // Centra el contenedor (ya que 'flex' está en el padre)
+            indexMenu.style.justifyContent = 'center';
+            indexMenu.style.alignItems = 'center';
 
-        // --- Lógica de Compra del Admin Block ---
-        async function buyAdminBlock() {
-            const currentTotalMoney = currentMoney + moneyAccumulator;
-            if (currentTotalMoney >= ADMIN_BLOCK_PRICE) {
+            if (controls) {
+                controls.enabled = !show;
+            }
+        }
+
+        function setupIndexListeners() {
+            indexButton.addEventListener('click', () => toggleIndexMenu(true));
+            closeIndexButton.addEventListener('click', () => toggleIndexMenu(false));
+        }
+        
+        // --- NUEVO: Lógica de Probabilidades Admin ---
+        function toggleAdminProbsModal(show) {
+            // Aplica el mismo estilo que el shop-menu
+            adminProbsModal.style.display = show ? 'flex' : 'none';
+            // Centra el contenedor
+            adminProbsModal.style.justifyContent = 'center';
+            adminProbsModal.style.alignItems = 'center';
+            // Asegura que esté por encima de la tienda
+            adminProbsModal.style.zIndex = '60'; 
+        }
+
+        function setupAdminProbsListeners() {
+            showAdminProbsButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evita que el click se propague al item de la tienda
+                toggleAdminProbsModal(true);
+            });
+            closeAdminProbsButton.addEventListener('click', () => toggleAdminProbsModal(false));
+        }
+
+        // --- NUEVO: Funciones para poblar los menús ---
+        function getRarityTailwindColor(rarity) {
+            switch (rarity) {
+                case 'Comun': return 'text-gray-500';
+                case 'Raro': return 'text-blue-600';
+                case 'Epico': return 'text-purple-600';
+                case 'Legendario': return 'text-yellow-500';
+                case 'Mitico': return 'text-red-600';
+                case 'God': return 'text-red-700 font-extrabold';
+                case 'Secreto': return 'text-gray-800 font-black';
+                default: return 'text-gray-900';
+            }
+        }
+
+        function populateCharacterIndex() {
+            if (!indexContent) return;
+            
+            // 1. Agrupar por rareza
+            const rarities = ["Comun", "Raro", "Epico", "Legendario", "Mitico", "God", "Secreto"];
+            const grouped = {};
+            rarities.forEach(r => grouped[r] = []);
+            
+            CHARACTER_DATA.forEach(char => {
+                if (grouped[char.rarity]) {
+                    grouped[char.rarity].push(char);
+                } else {
+                    // Fallback por si se añade una rareza nueva y no está en 'rarities'
+                    console.warn(`Rareza desconocida: ${char.rarity}`);
+                }
+            });
+
+            let html = '';
+
+            // 2. Generar HTML
+            rarities.forEach(rarity => {
+                const chars = grouped[rarity];
+                if (chars.length > 0) {
+                    // Ordenar por DPS
+                    chars.sort((a, b) => a.dps - b.dps);
+                    
+                    // Añadir cabecera de rareza
+                    html += `<h3 class="text-xl font-bold ${getRarityTailwindColor(rarity)} mt-4 mb-2 sticky top-0 bg-white bg-opacity-80 backdrop-blur-sm py-1 z-10">${rarity}</h3>`;
+                    
+                    // Añadir personajes
+                    html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-2">';
+                    chars.forEach(char => {
+                        html += `
+                            <div class="index-item p-2 border rounded-md bg-gray-50 shadow-sm">
+                                <h4 class="font-bold ${getRarityTailwindColor(char.rarity)}">${char.name}</h4>
+                                <p class="text-sm text-green-700">DPS: ${formatLargeNumber(char.dps)}</p>
+                                <p class="text-sm text-red-700">Costo: $${formatLargeNumber(char.cost)}</p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+            });
+            
+            indexContent.innerHTML = html;
+        }
+
+        function populateAdminProbs() {
+            if (!adminProbsContent) return;
+            
+            let html = '';
+            // Ordenar por probabilidad
+            const sortedProbs = [...ADMIN_BLOCK_PROBS].sort((a, b) => b.prob - a.prob);
+            
+            sortedProbs.forEach(item => {
+                const charData = CHARACTER_DATA.find(c => c.name === item.name);
+                const rarityColor = charData ? getRarityTailwindColor(charData.rarity) : 'text-gray-900';
+                
+                html += `
+                    <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+                        <span class="font-semibold ${rarityColor}">${item.name}</span>
+                        <span class="font-bold text-blue-600">${item.prob.toFixed(2)}%</span>
+                    </div>
+                `;
+            });
+            adminProbsContent.innerHTML = html;
+        }
+        // --- FIN NUEVO ---
+
+
+        // --- REQ: ELIMINADA LA FUNCIÓN setupCollectionInteraction() ---
+        /*
+        function setupCollectionInteraction() {
+            const handleStart = (e) => {
+                e.preventDefault(); 
+                if (totalMoneyToCollect >= 1) { // Solo si hay algo que recolectar
+                    isCollecting = true;
+                }
+            };
+            const handleEnd = (e) => {
+                e.preventDefault(); 
+                isCollecting = false;
+                collectProgress = 0; 
+                if(purchaseProgress) purchaseProgress.style.width = '0%';
+            };
+
+            collectAllButton.addEventListener('mousedown', handleStart);
+            collectAllButton.addEventListener('mouseup', handleEnd);
+            collectAllButton.addEventListener('mouseleave', handleEnd); 
+            collectAllButton.addEventListener('touchstart', handleStart, { passive: false });
+            collectAllButton.addEventListener('touchend', handleEnd, { passive: false });
+            collectAllButton.addEventListener('touchcancel', handleEnd, { passive: false });
+        }
+        */
+        // --- FIN REQ ---
+
+        // --- NUEVO: Lógica de Compra del Admin Block ---
+        // MODIFICADO: Eliminado 'async' y 'await'
+        function buyAdminBlock() {
+            if (currentMoney >= ADMIN_BLOCK_PRICE) {
+                // Actualizar UI
                 updateShopUI();
+
+                // Mostrar feedback
                 purchaseText.textContent = `¡Cunita Block Comprado!`;
                 purchaseTip.textContent = `Está yendo a tu base...`;
                 purchaseUI.style.opacity = '1';
                 setTimeout(() => { purchaseUI.style.opacity = '0'; }, 2000);
-                await updateMoneyBalance(-ADMIN_BLOCK_PRICE); // Modificado
+
+                // Guardar y Spawmear
+                updateMoneyBalance(-ADMIN_BLOCK_PRICE); // Esto actualiza dinero y guarda
                 spawnAdminBlock();
             } else {
+                // Feedback de fondos insuficientes
                 purchaseText.textContent = `Fondos Insuficientes`;
                 purchaseTip.textContent = `Necesitas $${formatLargeNumber(ADMIN_BLOCK_PRICE)}`;
                 purchaseUI.style.opacity = '1';
@@ -2139,6 +1909,7 @@
 
         function spawnAdminBlock() {
             const blockGeom = new THREE.BoxGeometry(1, 1, 1);
+            // Material brillante y morado
             const blockMat = new THREE.MeshPhongMaterial({ 
                 color: 0x9333ea, 
                 emissive: 0x9333ea, 
@@ -2146,20 +1917,26 @@
                 shininess: 100
             });
             const blockMesh = new THREE.Mesh(blockGeom, blockMat);
+            
+            // Posición inicial (spawn, pero más alto)
             const startPos = sceneProps.capsuleStartPos;
-            blockMesh.position.set(startPos.x, startPos.y + 3, startPos.z); 
+            blockMesh.position.set(startPos.x, startPos.y + 3, startPos.z); // Flotando
+            
             blockMesh.userData = { 
                 type: 'AdminBlock',
                 targetBase: playerBasePosition.clone()
             };
+            
             scene.add(blockMesh);
             adminBlocks.push(blockMesh);
         }
 
         function openAdminBlock(block, availableSlotIndex) {
+            // 1. Seleccionar Personaje
             let randomRoll = Math.random() * 100;
             let cumulativeProb = 0;
-            let selectedName = ADMIN_BLOCK_PROBS[ADMIN_BLOCK_PROBS.length - 1].name; 
+            let selectedName = ADMIN_BLOCK_PROBS[ADMIN_BLOCK_PROBS.length - 1].name; // Fallback
+
             for (const charProb of ADMIN_BLOCK_PROBS) {
                 cumulativeProb += charProb.prob;
                 if (randomRoll <= cumulativeProb) {
@@ -2167,16 +1944,22 @@
                     break;
                 }
             }
+
             const characterData = CHARACTER_DATA.find(c => c.name === selectedName);
             if (!characterData) {
                 console.error("No se encontró el personaje del Admin Block:", selectedName);
                 return;
             }
 
+            // 2. Colocar Personaje en la Base (lógica adaptada de updateCapsules)
             const finalPos = baseInventory[availableSlotIndex].position;
+            
+            // Usamos createStaticCapsule para obtener el mesh
             const capsuleMesh = createStaticCapsule(characterData);
             capsuleMesh.position.copy(finalPos);
             capsuleMesh.rotation.y = Math.random() * Math.PI * 2; 
+
+            // Asignar al slot del inventario
             capsuleMesh.userData.isCollected = false; 
             capsuleMesh.userData.isPlaced = true;
             capsuleMesh.userData.baseSlotIndex = availableSlotIndex;
@@ -2187,78 +1970,149 @@
                 dps: characterData.dps, 
                 rarity: characterData.rarity,
                 cost: characterData.cost
-                // ELIMINADO: lastCollectedTimestamp
+                // lastCollectedTimestamp: Timestamp.now() // ELIMINADO
             };
             
+            // Añadir a la escena
             scene.add(capsuleMesh);
             capsules.push(capsuleMesh);
 
-            // ELIMINADO: Añadir MoneyLabel
-            // ELIMINADO: Añadir CollectButton
+            // Añadir etiqueta de dinero
+            /* ELIMINADO
+            const moneyLabel = createMoneyLabel(characterData);
+            if (moneyLabel) {
+                capsuleMesh.add(moneyLabel);
+                capsuleMesh.userData.moneyLabel = moneyLabel;
+            }
+            */
+            
+            // --- INICIO DE CORRECCIÓN ---
+            // NUEVO: Añadir botón de recolección al colocar (Admin Block)
+            /* ELIMINADO
+            const collectButton = createCollectButton();
+            collectButton.position.set(finalPos.x, 0.2, finalPos.z + 2.5); // Posicionar en frente
+            collectButton.userData.baseSlotIndex = availableSlotIndex;
+            scene.add(collectButton);
+            collectButtons.push(collectButton);
+            */
+            // --- FIN DE CORRECCIÓN ---
 
+            // 3. Guardar y actualizar
             saveBaseInventory();
             calculateBaseDps();
             updateMoneyDisplay();
 
+            // 4. Mostrar Feedback
             purchaseText.textContent = `¡Admin Block Abierto!`;
             purchaseTip.textContent = `Obtuviste: ${characterData.name}`;
             purchaseUI.style.opacity = '1';
             setTimeout(() => { purchaseUI.style.opacity = '0'; }, 3000);
 
+            // 5. Eliminar el block de la escena
             scene.remove(block);
             const indexToRemove = adminBlocks.indexOf(block);
             if (indexToRemove !== -1) {
                 adminBlocks.splice(indexToRemove, 1);
             }
         }
+        // --- FIN NUEVO ---
 
+        // --- NUEVO: Mostrar/Ocultar Controles de Vuelo ---
         function toggleFlightControls(shouldShow) {
             flightControls.style.display = shouldShow ? 'flex' : 'none';
         }
+        // --- FIN NUEVO ---
 
 
         // =========================================================
         // 8. THREE.JS: FUNCIONES DE CÁPSULAS Y LÓGICA DE JUEGO
         // =========================================================
         
-        // ... (getCapsuleMesh, createCapsuleLabel ... sin cambios)
         function getCapsuleMesh(characterData) {
             const { capsuleRadius, capsuleHeight } = sceneProps;
             let group;
+
+            // Intenta cargar el modelo 3D pre-cargado
             if (loadedModels[characterData.name]) {
                 group = loadedModels[characterData.name].clone();
+                
+                // --- MODIFICADO: Escalar y Centrar ---
+                // Escalar el modelo a un tamaño razonable
+                // Se basa en la altura TOTAL de la cápsula de fallback (cilindro + 2 esferas)
+                const desiredHeight = capsuleHeight + (2 * capsuleRadius); // 2 + (2 * 0.5) = 3
+                
                 const box = new THREE.Box3().setFromObject(group);
                 const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                if (maxDim > 0) { 
-                    const scale = capsuleHeight / maxDim;
+                const height = size.y;
+                
+                let scale = 1;
+                if (height > 0.001) { // Evitar división por cero
+                    scale = desiredHeight / height; // Escalar a 3 unidades de altura
                     group.scale.set(scale, scale, scale);
                 } else {
                     group.scale.set(1, 1, 1);
                 }
+
+                // Después de escalar, recalcular la caja para centrarlo verticalmente
+                // Esto soluciona problemas de modelos "flotando" o "hundidos"
+                const newBox = new THREE.Box3().setFromObject(group);
+                const newCenter = newBox.getCenter(new THREE.Vector3());
+                
+                // Queremos que el modelo esté centrado en y=0,
+                // igual que el grupo de fallback (cilindro + esferas).
+                // El centro del modelo (newCenter.y) debe moverse a y=0.
+                
+                const yOffset = -newCenter.y;
+                
+                // Aplicar el desplazamiento a todos los hijos del grupo
+                // (Mueve la geometría *dentro* del objeto 'group')
+                group.children.forEach(child => {
+                    child.position.y += yOffset;
+                });
+                // --- FIN MODIFICADO ---
+
+                
+                // Asegurarse de que el modelo proyecte/reciba sombras
                 group.traverse((child) => {
                     if (child.isMesh) {
                         child.castShadow = true;
                         child.receiveShadow = true;
+                        // Opcional: Si los modelos no tienen texturas, podemos aplicar el color de rareza
+                        // if (!child.material.map) {
+                        //    child.material = new THREE.MeshPhongMaterial({ 
+                        //       color: getRarityColor(characterData.rarity),
+                        //       shininess: 100 
+                        //    });
+                        // }
                     }
                 });
+
             } else {
+                // --- Fallback a la geometría original (si el modelo no se cargó) ---
+                // console.warn(`Modelo para ${characterData.name} no encontrado. Usando geometría de fallback.`);
                 const randomColor = new THREE.Color(Math.random(), Math.random(), Math.random());
                 const capsuleMaterial = new THREE.MeshPhongMaterial({ color: randomColor.getHex(), shininess: 100 });
+                
                 if (characterData.rarity) {
                      capsuleMaterial.color.setHex(getRarityColor(characterData.rarity));
                 }
+
                 group = new THREE.Group();
                 const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(capsuleRadius, capsuleRadius, capsuleHeight, 16), capsuleMaterial);
                 const sphere = new THREE.Mesh(new THREE.SphereGeometry(capsuleRadius, 16, 16), capsuleMaterial);
+                
                 cylinder.castShadow = cylinder.receiveShadow = true;
                 sphere.castShadow = sphere.receiveShadow = true;
+                
                 const sphereBottom = sphere.clone();
                 sphereBottom.position.y = -capsuleHeight / 2;
                 const sphereTop = sphere.clone();
                 sphereTop.position.y = capsuleHeight / 2;
+                
                 group.add(cylinder, sphereBottom, sphereTop);
             }
+
+            // Asignar userData al grupo principal
             group.userData = { 
                 type: 'Capsule', 
                 cost: characterData.cost, 
@@ -2270,24 +2124,29 @@
                 targetBase: null,
                 baseSlotIndex: -1
             };
+            
             return group;
         }
+
 
         function createCapsuleLabel(character) {
             if (!font) {
                 console.warn("Fuente 3D no cargada, no se puede crear etiqueta.");
                 return new THREE.Group(); 
             }
+
             const group = new THREE.Group();
             const textMaterial = new THREE.MeshPhongMaterial({ 
                 color: getRarityColor(character.rarity), 
                 specular: 0xffffff,
                 shininess: 30,
             });
+
             const textOptions = {
                 font: font, size: 0.5, height: 0.05, curveSegments: 12,
                 bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelOffset: 0, bevelSegments: 5
             };
+
             const nameGeometry = new THREE.TextGeometry(character.name, textOptions);
             nameGeometry.computeBoundingBox();
             const nameWidth = nameGeometry.boundingBox.max.x - nameGeometry.boundingBox.min.x;
@@ -2327,11 +2186,58 @@
 
             group.position.y = sceneProps.capsuleHeight / 2 + sceneProps.capsuleLabelOffset.y;
             group.lookAt(camera.position); 
+
             return group;
         }
 
-        // --- ELIMINADO: createMoneyLabel() ---
+        // NUEVO: Crea una etiqueta 3D para mostrar el dinero acumulado
+        /* ELIMINADO: Ya no se usa
+        function createMoneyLabel(character) {
+            if (!font) return null; // No font, no label
+            
+            const group = new THREE.Group();
+            
+            // 1. Nombre del Personaje
+            const nameMaterial = new THREE.MeshPhongMaterial({ 
+                color: getRarityColor(character.rarity),
+                specular: 0xffffff,
+                shininess: 30,
+            });
+            const nameOptions = { font: font, size: 0.3, height: 0.05, curveSegments: 12 };
+            const nameGeometry = new THREE.TextGeometry(character.name, nameOptions);
+            nameGeometry.computeBoundingBox();
+            const nameWidth = nameGeometry.boundingBox.max.x - nameGeometry.boundingBox.min.x;
+            const nameMesh = new THREE.Mesh(nameGeometry, nameMaterial);
+            nameMesh.position.set(-nameWidth / 2, 0.4, 0); // Arriba
+            nameMesh.castShadow = true;
+            group.add(nameMesh);
 
+            // 2. Texto de Dinero (placeholder)
+            const moneyMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x38a169, // Verde dinero
+                specular: 0xffffff,
+                shininess: 30,
+            });
+            const moneyOptions = { font: font, size: 0.4, height: 0.05, curveSegments: 12 };
+            const moneyGeometry = new THREE.TextGeometry('$0', moneyOptions);
+            moneyGeometry.computeBoundingBox();
+            const moneyWidth = moneyGeometry.boundingBox.max.x - moneyGeometry.boundingBox.min.x;
+            const moneyMesh = new THREE.Mesh(moneyGeometry, moneyMaterial);
+            moneyMesh.position.set(-moneyWidth / 2, 0, 0); // Debajo del nombre
+            moneyMesh.castShadow = true;
+            
+            group.add(moneyMesh);
+            // Guardar referencias para la actualización de texto y centrado
+            group.userData.moneyMesh = moneyMesh;
+            group.userData.moneyMeshOptions = moneyOptions; 
+
+            // Posicionar el label encima de la cápsula
+            group.position.y = sceneProps.capsuleHeight / 2 + 1.0; // Ajustar altura
+            return group;
+        }
+        */
+
+        // Función auxiliar para crear cápsulas que ya están coleccionadas (desde Firebase)
         function createStaticCapsule(characterData) {
             const mesh = getCapsuleMesh(characterData);
             mesh.userData.isCollected = false;
@@ -2361,7 +2267,7 @@
             if (character.rarity === 'Mitico') { mythicTimer = 0; legendaryTimer = 0; } 
             else if (character.rarity === 'Legendario') { legendaryTimer = 0; }
             
-            saveTimersState(); 
+            saveTimersState(); // MODIFICADO: Eliminado 'await'
 
             const { capsuleStartPos } = sceneProps;
             
@@ -2385,7 +2291,7 @@
             for (let i = capsules.length - 1; i >= 0; i--) {
                 const capsule = capsules[i];
                 
-                // 1. Cápsulas en movimiento
+                // 1. Cápsulas en movimiento por el carril (No coleccionadas ni colocadas)
                 if (!capsule.userData.isCollected && !capsule.userData.isPlaced) {
                     capsule.position.z += sceneProps.capsuleSpeed * delta;
                     
@@ -2400,38 +2306,60 @@
                     }
                 } 
                 
-                // 2. Cápsulas en transición (compradas)
+                // 2. Cápsulas en transición (Recién compradas)
                 else if (capsule.userData.isCollected && !capsule.userData.isPlaced) {
-                    // MODIFICADO: Usa playerBasePosition que ahora es dinámica
                     const target = playerBasePosition;
-                    const speed = 0.8 * delta; 
+                    const speed = 0.8 * delta; // ¡Reducido de nuevo! Era 2.0, ahora es 0.8 para un movimiento mucho más lento
                     capsule.position.lerp(target, speed); 
 
+                    // Chequear colisión con la base
                     if (capsule.position.distanceTo(target) < 2.0) {
                         const availableSlotIndex = baseInventory.findIndex(slot => !slot.occupied);
                         
                         if (availableSlotIndex !== -1) {
+                            // Asignar y colocar en el slot
                             const finalPos = baseInventory[availableSlotIndex].position;
+
                             capsule.position.copy(finalPos);
                             capsule.rotation.y = Math.random() * Math.PI * 2; 
+
+                            // Actualizar userData y el inventario persistente
                             capsule.userData.isCollected = false; 
                             capsule.userData.isPlaced = true;
                             capsule.userData.baseSlotIndex = availableSlotIndex;
                             
                             baseInventory[availableSlotIndex].occupied = true;
                             
+                            // MODIFICADO: Añadir lastCollectedTimestamp al guardar
                             baseInventory[availableSlotIndex].capsuleData = { 
                                 name: capsule.userData.name, 
                                 dps: capsule.userData.dps, 
                                 rarity: capsule.userData.rarity,
                                 cost: capsule.userData.cost
-                                // ELIMINADO: lastCollectedTimestamp
+                                // lastCollectedTimestamp: Timestamp.now() // ELIMINADO
                             };
                             
-                            // ELIMINADO: Añadir MoneyLabel
-                            // ELIMINADO: Añadir CollectButton
+                            // NUEVO: Añadir etiqueta de dinero al colocar
+                            /* ELIMINADO
+                            const moneyLabel = createMoneyLabel(capsule.userData);
+                            if (moneyLabel) {
+                                capsule.add(moneyLabel);
+                                capsule.userData.moneyLabel = moneyLabel;
+                            }
+                            */
+
+                            // NUEVO: Añadir botón de recolección al colocar
+                            /* ELIMINADO
+                            const collectButton = createCollectButton();
+                            collectButton.position.set(finalPos.x, 0.2, finalPos.z + 2.5); // Posicionar en frente
+                            collectButton.userData.baseSlotIndex = availableSlotIndex;
+                            scene.add(collectButton);
+                            collectButtons.push(collectButton);
+                            */
                             
-                            saveBaseInventory();
+                            saveBaseInventory(); // MODIFICADO: Eliminado 'await'
+
+                            // NUEVO: Recalcular DPS y actualizar UI
                             calculateBaseDps();
                             updateMoneyDisplay();
 
@@ -2444,49 +2372,107 @@
             }
         }
         
+        // --- NUEVO: Actualizar Admin Blocks ---
         function updateAdminBlocks(delta) {
             for (let i = adminBlocks.length - 1; i >= 0; i--) {
                 const block = adminBlocks[i];
                 const target = block.userData.targetBase;
-                block.position.y = (playerBasePosition.y + sceneProps.capsuleHeight) + Math.sin(performance.now() * 0.002) * 0.5;
-                const speed = 0.8 * delta; 
-                block.position.lerp(target, speed);
-                block.rotation.y += delta * 0.5; 
                 
+                // --- INICIO DE CORRECCIÓN ---
+                // Añadir un balanceo (wobble)
+                block.position.y = (playerBasePosition.y + sceneProps.capsuleHeight) + Math.sin(performance.now() * 0.002) * 0.5;
+                
+                // Moverse hacia la base
+                const speed = 0.8 * delta; // Misma velocidad que la cápsula
+                block.position.lerp(target, speed);
+                block.rotation.y += delta * 0.5; // Girar lentamente
+                
+                // Chequear llegada
                 const distanceXZ = Math.sqrt(Math.pow(block.position.x - target.x, 2) + Math.pow(block.position.z - target.z, 2));
 
                 if (distanceXZ < 2.0) {
                     const availableSlotIndex = baseInventory.findIndex(slot => !slot.occupied);
+                    
                     if (availableSlotIndex !== -1) {
+                        // --- FIN DE CORRECCIÓN ---
                         openAdminBlock(block, availableSlotIndex);
-                    } 
+                        // El 'continue' no es necesario porque 'openAdminBlock' elimina el item del array
+                        // y el bucle for va hacia atrás (i--).
+                    } else {
+                        // Base llena, el block espera.
+                        // (No hacer nada, seguirá en el bucle 'lerp' y 'wobble')
+                    }
                 }
             }
         }
+        // --- FIN NUEVO ---
 
         // =========================================================
         // 9. LÓGICA DEL TEMPORIZADOR Y BUCLE DE ANIMACIÓN
         // =========================================================
 
-        // Genera dinero pasivamente basado en el DPS
+        // NUEVO: Genera dinero pasivamente basado en el DPS
         function passiveMoneyGain(delta, time) {
-            if (!userId || !db || currentBaseDps <= 0) return;
+            if (currentBaseDps <= 0) return; // MODIFICADO: Eliminada la comprobación de Firebase
 
             const moneyEarned = currentBaseDps * delta;
             moneyAccumulator += moneyEarned;
 
+            // Guardar en Firebase periódicamente
             const timeInSeconds = time / 1000;
             if (timeInSeconds - lastMoneySaveTime > MONEY_SAVE_INTERVAL) {
                 if (moneyAccumulator > 0) {
-                    const amountToSave = moneyAccumulator;
-                    moneyAccumulator = 0; // Resetea localmente primero
-                    updateMoneyBalance(amountToSave); // Envía la actualización atómica
+                    // Usar la actualización atómica
+                    updateMoneyBalance(moneyAccumulator); // MODIFICADO: Esta función ahora es síncrona
+                    // Resetear el acumulador local
+                    moneyAccumulator = 0; 
                 }
                 lastMoneySaveTime = timeInSeconds;
             }
         }
 
-        // --- ELIMINADAS: collectAllMoney, executeCollection, collectMoneyForSlot, updateCollectionPads, updateMoneyLabels ---
+        // NUEVA FUNCIÓN: Reclama todo el dinero de todos los slots
+        /* ELIMINADO: Ya no es necesario
+        async function collectAllMoney() {
+            // ...
+        } // Fin de collectAllMoney
+        */
+
+        // NUEVA FUNCIÓN: Recolección automática de dinero (REQ)
+        /* REQ: Eliminada
+        async function autoCollectAllMoney() {
+            // ...
+        } // Fin de autoCollectAllMoney
+        */
+
+        // --- REQ: Nueva función para ejecutar la recolección (llamada por la barra de progreso) ---
+        /* ELIMINADO: Ya no es necesario
+        async function executeCollection() {
+            // ...
+        }
+        */
+        // --- FIN REQ ---
+
+        // AÑADIDO: Lógica para recolectar dinero de los pads
+        /* ELIMINADO: Ya no es necesario
+        async function collectMoneyForSlot(index) {
+            // ...
+        }
+        */
+ 
+        // AÑADIDO: Chequear colisión con pads de recolección
+        /* ELIMINADO: Ya no es necesario
+        function updateCollectionPads(delta) {
+            // ...
+        }
+        */
+        
+        // NUEVO: Actualiza las etiquetas 3D de dinero sobre las cápsulas
+        /* ELIMINADO: Ya no es necesario
+        function updateMoneyLabels() {
+            // ...
+        }
+        */
 
         function updateTimers(delta) {
             legendaryTimer = Math.min(LEGENDARY_GUARANTEE_TIME, legendaryTimer + delta);
@@ -2522,47 +2508,62 @@
             if (moveState.right) { camera.position.addScaledVector(strafeDirection, actualSpeed); moved = true; }
             
             if (moved) {
+                // --- LÓGICA DE MOVIMIENTO Y COLISIÓN REESTRUCTURADA ---
                 if (isFlying) {
+                    // --- MODO VUELO ---
+                    // 1. Aplicar movimiento vertical (Arriba/Abajo)
                     if (moveState.up) camera.position.y += actualSpeed;
                     if (moveState.down) camera.position.y -= actualSpeed;
                     
+                    // 2. Colisionar solo con las paredes exteriores (staticStructureBounds)
                     staticStructureBounds.forEach(bound => {
                         if (camera.position.x + playerRadius > bound.minX && camera.position.x - playerRadius < bound.maxX &&
                             camera.position.z + playerRadius > bound.minZ && camera.position.z - playerRadius < bound.maxZ) {
                             
+                            // (Lógica de corrección de colisión copiada de abajo)
                             const penXMin = bound.maxX - (camera.position.x - playerRadius);
                             const penXMax = (camera.position.x + playerRadius) - bound.minX;
                             const penZMin = bound.maxZ - (camera.position.z - playerRadius);
                             const penZMax = (camera.position.z + playerRadius) - bound.minZ;
+
                             let minPen = Infinity;
                             let correction = { amount: 0, axis: null };
+
                             if (penXMin > 0 && penXMin < minPen) { minPen = penXMin; correction = { amount: penXMin, axis: 'X', sign: -1 }; }
                             if (penXMax > 0 && penXMax < minPen) { minPen = penXMax; correction = { amount: penXMax, axis: 'X', sign: 1 }; }
                             if (penZMin > 0 && penZMin < minPen) { minPen = penZMin; correction = { amount: penZMin, axis: 'Z', sign: -1 }; }
                             if (penZMax > 0 && penZMax < minPen) { minPen = penZMax; correction = { amount: penZMax, axis: 'Z', sign: 1 }; }
+
                             if (correction.axis === 'X') { camera.position.x += correction.amount * correction.sign; } 
                             else if (correction.axis === 'Z') { camera.position.z += correction.amount * correction.sign; }
                         }
                     });
                     
+                    // Asegurarse de no volar por debajo del suelo
                     if (camera.position.y < playerHeight) {
                         camera.position.y = playerHeight;
                     }
 
                 } else {
+                    // --- MODO CAMINAR ---
+                    // 1. Revisar agujeros (teletransportar si cae)
                     let fellInHole = false;
                     holeBounds.forEach(hole => {
                         if (camera.position.x + playerRadius > hole.minX && camera.position.x - playerRadius < hole.maxX &&
                             camera.position.z + playerRadius > hole.minZ && camera.position.z - playerRadius < hole.maxZ) {
+                            
+                            // ¡CAÍDA! Teletransportar al inicio
                             camera.position.set(0, playerHeight, 0); 
+                            // Forzar la actualización del target de la cámara
                             const newTargetOnFall = camera.position.clone().add(direction.multiplyScalar(0.001));
                             controls.target.set(newTargetOnFall.x, newTargetOnFall.y, newTargetOnFall.z);
                             fellInHole = true;
                         }
                     });
 
+                    // 2. Si no se cayó, revisar colisiones con estructuras y láseres
                     if (!fellInHole) {
-                        structureBounds.forEach(bound => { 
+                        structureBounds.forEach(bound => { // structureBounds incluye todo (paredes, casetas, láseres)
                             if (camera.position.x + playerRadius > bound.minX && camera.position.x - playerRadius < bound.maxX &&
                                 camera.position.z + playerRadius > bound.minZ && camera.position.z - playerRadius < bound.maxZ &&
                                 camera.position.y < bound.maxY && camera.position.y > bound.minY) {
@@ -2571,61 +2572,42 @@
                                 const penXMax = (camera.position.x + playerRadius) - bound.minX;
                                 const penZMin = bound.maxZ - (camera.position.z - playerRadius);
                                 const penZMax = (camera.position.z + playerRadius) - bound.minZ;
+
                                 let minPen = Infinity;
                                 let correction = { amount: 0, axis: null };
+
                                 if (penXMin > 0 && penXMin < minPen) { minPen = penXMin; correction = { amount: penXMin, axis: 'X', sign: -1 }; }
                                 if (penXMax > 0 && penXMax < minPen) { minPen = penXMax; correction = { amount: penXMax, axis: 'X', sign: 1 }; }
                                 if (penZMin > 0 && penZMin < minPen) { minPen = penZMin; correction = { amount: penZMin, axis: 'Z', sign: -1 }; }
                                 if (penZMax > 0 && penZMax < minPen) { minPen = penZMax; correction = { amount: penZMax, axis: 'Z', sign: 1 }; }
+
                                 if (correction.axis === 'X') { camera.position.x += correction.amount * correction.sign; } 
                                 else if (correction.axis === 'Z') { camera.position.z += correction.amount * correction.sign; }
                             }
                         });
                     }
                     
+                    // 3. Bloquear al suelo
                     camera.position.y = playerHeight; 
                 }
                 
+                // Actualizar el target de la cámara (común para ambos modos)
                 const newTarget = camera.position.clone().add(direction.multiplyScalar(0.001));
                 controls.target.set(newTarget.x, newTarget.y, newTarget.z);
             }
         }
 
-        // --- ELIMINADO: updateDoorAndInteraction(delta) ---
+        // ELIMINADA: function updateDoorAndInteraction(delta)
 
-        function checkAndReopenBases() {
-            if (!db || !Timestamp || !userId) return; 
-            const now = Timestamp.now();
-
-            // MODIFICADO: Itera sobre la lista global
-            for (const baseId of ALL_BASE_IDS) {
-                const laserGrid = baseLaserGrids[baseId];
-                if (laserGrid && laserGrid.userData.isClosed && laserGrid.userData.reOpenTime && !laserGrid.userData.isReopening) {
-                    if (now.seconds >= laserGrid.userData.reOpenTime.seconds) {
-                        if (laserGrid.userData.closedByUserId === userId) {
-                            laserGrid.userData.isReopening = true; 
-                            (async () => {
-                                try {
-                                    await setDoc(getBaseDocRef(baseId), { 
-                                        isClosed: false, 
-                                        closedByUserId: null, 
-                                        reOpenTime: null 
-                                    }, { merge: true });
-                                } catch (error) {
-                                    console.error("Error al reabrir la base:", error);
-                                    laserGrid.userData.isReopening = false; 
-                                }
-                            })();
-                        }
-                    }
-                }
-            }
-        }
+        // ELIMINADA: function checkAndReopenBases()
 
 
         function updateBuySellInteraction(delta) {
+            // 1. Raycasting
             raycaster.setFromCamera({ x: 0, y: 0 }, camera);
             
+            // --- NUEVA LÓGICA DE RAYCASTING (RECURSIVA) ---
+            // 1. Obtener los grupos principales de cápsulas
             const buyableCapsules = capsules.filter(group => 
                 !group.userData.isPlaced && !group.userData.isCollected
             );
@@ -2633,23 +2615,33 @@
                 group.userData.isPlaced
             );
             
+            // 2. Intersectar recursivamente (true)
             const intersectsBuy = raycaster.intersectObjects(buyableCapsules, true);
             const intersectsSell = raycaster.intersectObjects(placedCapsules, true);
             
-            const allButtons = Object.values(baseButtons);
-            const intersectsButtons = raycaster.intersectObjects(allButtons, false);
-            let targetButton = intersectsButtons.length > 0 && intersectsButtons[0].distance <= 5 ? intersectsButtons[0].object : null;
+            // --- FIN DE LÓGICA DE RAYCASTING ---
+            
+            // --- ELIMINADO: Raycast para Botones de Base ---
+            let targetButton = null;
 
-            // ELIMINADO: Raycast de CollectButton
+            // NUEVO: Raycast para Botones de Recolección
+            // REQ: Deshabilitado para recolección automática
+            // const intersectsCollectButtons = raycaster.intersectObjects(collectButtons, false);
+            // let targetCollectButton = intersectsCollectButtons.length > 0 && intersectsCollectButtons[0].distance <= 5 ? intersectsCollectButtons[0].object : null;
+            let targetCollectButton = null; // REQ: Forzado a null
 
+
+            // --- FUNCIÓN AUXILIAR PARA ENCONTRAR EL PADRE DE LA CÁPSULA ---
             const findCapsuleParent = (intersectedObject) => {
                 let parent = intersectedObject;
+                // Sube por el árbol hasta encontrar el userData 'Capsule' o llegar a la raíz
                 while (parent.parent && !parent.userData.type) {
                     parent = parent.parent;
                 }
                 return (parent && parent.userData.type === 'Capsule') ? parent : null;
             };
 
+            // Determinar target
             targetCapsule = intersectsBuy.length > 0 && intersectsBuy[0].distance <= capsuleBuyRange 
                 ? findCapsuleParent(intersectsBuy[0].object) 
                 : null;
@@ -2657,80 +2649,72 @@
                 ? findCapsuleParent(intersectsSell[0].object) 
                 : null;
 
+            // 2. Control de la visibilidad y estado de los botones
+            
+            // Ocultar la UI de progreso si no hay interacción de compra/venta activa
             if (!isBuying && !isSelling) { purchaseUI.style.opacity = '0'; }
 
 
             // --- Lógica del Botón de COMPRA ---
             const availableSlotIndex = baseInventory.findIndex(slot => !slot.occupied);
             const isBaseFull = availableSlotIndex === -1;
-            // MODIFICADO: Chequea el dinero real (base + acumulado)
-            const currentTotalMoney = currentMoney + moneyAccumulator;
 
             if (targetCapsule) {
+                // Hay una cápsula en el carril
                 sellButton.style.display = 'none';
                 buyButton.style.display = 'block';
+
                 const cost = targetCapsule.userData.cost;
-                const canAfford = currentTotalMoney >= cost;
+                const canAfford = currentMoney >= cost;
                 
                 if (isBaseFull) {
                     buyButton.textContent = `Base Llena`;
                     buyButton.disabled = true;
                     buyButton.style.opacity = 0.4;
+                    // Mostrar tip de base llena si el jugador está apuntando
                     if (intersectsBuy.length > 0) {
                         purchaseTip.textContent = `¡Base llena! Vende para hacer espacio.`;
                         purchaseUI.style.opacity = '1';
                     }
                 } else {
-                    buyButton.textContent = canAfford ? `Comprar ($${formatLargeNumber(cost)})` : `Faltan $${formatLargeNumber(cost - currentTotalMoney)}`;
+                    buyButton.textContent = canAfford ? `Comprar ($${formatLargeNumber(cost)})` : `Faltan $${formatLargeNumber(cost - currentMoney)}`;
                     buyButton.disabled = !canAfford; 
                     buyButton.style.opacity = canAfford ? 1 : 0.6;
                     buyButton.style.cursor = canAfford ? 'pointer' : 'default';
                 }
             } else if (targetPlacedCapsule) {
+                // Hay una cápsula colocada para vender
                 buyButton.style.display = 'none';
                 sellButton.style.display = 'block';
+
                 const salePrice = Math.floor(targetPlacedCapsule.userData.cost / 2);
                 sellButton.textContent = `Vender ($${formatLargeNumber(salePrice)})`;
                 sellButton.disabled = false; 
                 sellButton.style.opacity = 1;
                 sellButton.style.cursor = 'pointer';
             } else {
+                // No hay nada para comprar ni vender
                 buyButton.style.display = 'block';
                 sellButton.style.display = 'none';
+                
                 buyButton.textContent = `Apunta para Comprar`;
                 buyButton.disabled = true;
                 buyButton.style.opacity = 0.6;
                 buyButton.style.cursor = 'default';
             }
             
-            // --- Lógica del Botón de Interacción de la Base ---
-            if (targetButton) { 
-                const baseId = targetButton.userData.baseId;
-                const laserGrid = baseLaserGrids[baseId];
-
-                if (laserGrid && !laserGrid.userData.isClosed) {
-                    interactionButtonBase.style.display = 'block';
-                    interactionButtonBase.textContent = 'Cerrar Base';
-                    interactionButtonBase.style.backgroundColor = '#f59e0b'; 
-                    interactionButtonBase.onclick = () => handleBaseButtonPress(baseId);
-                } else {
-                    interactionButtonBase.style.display = 'none';
-                    interactionButtonBase.onclick = null;
-                }
-            // ELIMINADO: else if (targetCollectButton)
-            } else if (!targetCapsule && !targetPlacedCapsule) {
-                interactionButtonBase.style.display = 'none';
-                interactionButtonBase.onclick = null;
-            } else if (targetCapsule || targetPlacedCapsule) {
-                interactionButtonBase.style.display = 'none';
-                interactionButtonBase.onclick = null;
-            }
+            // --- ELIMINADA: Lógica del Botón de Interacción de la Base ---
+            // El botón 'interaction-button-base' ya no se mostrará
+            interactionButtonBase.style.display = 'none';
+            interactionButtonBase.onclick = null;
 
 
-            // --- Lógica de Compra/Venta ---
+            // 3. Lógica de Compra/Venta
 
             if (isBuying) {
+                // Lógica de Compra (si está en curso)
                 buyProgress = Math.min(1.0, buyProgress + delta / buyDuration);
+                
                 purchaseUI.style.opacity = '1';
                 purchaseText.textContent = `Comprando ${targetCapsule.userData.name}: ${Math.round(buyProgress * 100)}%`;
                 purchaseTip.textContent = `Mantén presionado el botón.`;
@@ -2738,28 +2722,35 @@
 
                 if (buyProgress >= 1.0) {
                     const cost = targetCapsule.userData.cost;
-                    const currentTotalMoney = currentMoney + moneyAccumulator;
+                    // const dpsGain = targetCapsule.userData.dps; // ELIMINADO: El DPS ya no es global
 
-                    if (currentTotalMoney >= cost) {
+                    if (currentMoney >= cost) {
+                        // Iniciar Colección (Movimiento a la base)
                         targetCapsule.userData.isCollected = true;
                         targetCapsule.userData.targetBase = playerBasePosition.clone();
+                        
                         if (targetCapsule.userData.label) {
                              targetCapsule.remove(targetCapsule.userData.label);
                              targetCapsule.userData.label = null;
                         }
-                        (async () => {
-                            await updateMoneyBalance(-cost); 
-                        })();
+
+                        // MODIFICADO: Actualización de dinero síncrona
+                        updateMoneyBalance(-cost);
+                        
                     } else {
                         purchaseTip.textContent = `¡Compra fallida! Dinero insuficiente.`;
                     }
+
                     isBuying = false;
                     buyProgress = 0;
                     targetCapsule = null; 
+                    // No ocultamos la UI de progreso aquí para que el mensaje de éxito/fallo se vea por un instante
                 }
             } else if (isSelling) {
+                // Lógica de Venta (si está en curso)
                 buyProgress = Math.min(1.0, buyProgress + delta / buyDuration);
                 const salePrice = Math.floor(targetPlacedCapsule.userData.cost / 2);
+                // const dpsLoss = targetPlacedCapsule.userData.dps; // ELIMINADO: El DPS ya no es global
                 
                 purchaseUI.style.opacity = '1';
                 purchaseText.textContent = `Vendiendo ${targetPlacedCapsule.userData.name}: ${Math.round(buyProgress * 100)}%`;
@@ -2767,31 +2758,41 @@
                 purchaseProgress.style.width = `${buyProgress * 100}%`;
 
                 if (buyProgress >= 1.0) {
+                    // 4. Completar Venta
+                    
+                    // Eliminar del inventario
                     const slotIndex = targetPlacedCapsule.userData.baseSlotIndex;
                     if (slotIndex !== -1) {
                         baseInventory[slotIndex].occupied = false;
                         baseInventory[slotIndex].capsuleData = null;
-                        // ELIMINADO: Remover botón de recolección
+
+                        // ELIMINADO: Lógica de eliminación de botón de recolección
                     }
 
+                    // Eliminar de la escena 3D y de la lista de cápsulas
                     scene.remove(targetPlacedCapsule);
                     const indexToRemove = capsules.indexOf(targetPlacedCapsule);
                     if (indexToRemove !== -1) { capsules.splice(indexToRemove, 1); }
+                    
                     targetPlacedCapsule = null;
                     
-                    (async () => {
-                        await updateMoneyBalance(salePrice); 
-                        await saveBaseInventory(); 
-                        calculateBaseDps();
-                        updateMoneyDisplay();
-                    })();
+                    // MODIFICADO: Actualización síncrona
+                    updateMoneyBalance(salePrice); 
+                    saveBaseInventory(); 
+                    calculateBaseDps();
+                    updateMoneyDisplay(); // updateMoneyBalance ya lo hace, pero por si acaso
 
-                    purchaseTip.textContent = `Vendido por $${formatLargeNumber(salePrice)}!`; 
+                    purchaseTip.textContent = `Vendido por $${formatLargeNumber(salePrice)}!`; // Mensaje actualizado
+
                     isSelling = false;
                     buyProgress = 0;
+                    // No ocultamos la UI de progreso aquí para que el mensaje de éxito se vea por un instante
                 }
             } else {
+                // Si la compra o venta termina, o no hay objetivo, asegurar que el progreso esté a cero.
                 buyProgress = 0; 
+                // No tocar la UI de progreso aquí, para permitir que los mensajes de recolección se muestren
+                // purchaseProgress.style.width = '0%'; 
             }
         }
 
@@ -2805,33 +2806,53 @@
             if (controls) controls.update(); 
 
             // Lógica Central del Juego
+            // passiveMoneyGain(delta); // ELIMINADO
             updateCapsules(delta); 
-            updateAdminBlocks(delta); 
+            updateAdminBlocks(delta); // NUEVO
             updateMovementAndCollisions(delta);
-            passiveMoneyGain(delta, time); // Genera dinero pasivo
-            updateMoneyDisplay(); // Actualiza la UI del dinero en cada frame
+            // updateCollectionPads(delta); // ELIMINADO
+            // updateMoneyLabels(); // ELIMINADO: Ya no hay etiquetas de dinero
+            passiveMoneyGain(delta, time); // NUEVO: Genera dinero pasivo
+            updateMoneyDisplay(); // NUEVO: Actualiza la UI del dinero en cada frame
             updateBuySellInteraction(delta); 
             updateTimers(delta); 
 
-            // ELIMINADO: Lógica de recolección
-
-            const nowInSeconds = time / 1000;
-            if (nowInSeconds - lastBaseCheck > 1.0) {
-                lastBaseCheck = nowInSeconds;
-                checkAndReopenBases();
+            // --- NUEVO: Lógica de Auto-Recolección (REQ) ---
+            /* REQ: Eliminada
+            autoCollectTimer += delta;
+            if (autoCollectTimer >= AUTO_COLLECT_INTERVAL) {
+                autoCollectAllMoney();
+                autoCollectTimer = 0; // Resetear el timer
             }
+            */
+            // --- FIN REQ ---
 
+            // --- REQ: Nueva lógica de Recolección Manual (tipo Compra) ---
+            // REQ: Renombrada a una función más simple que solo actualiza la UI del botón
+            // updateCollectButtonUI(delta); // ELIMINADO
+            // --- FIN REQ ---
+
+            // ELIMINADO: Chequeo de reapertura de bases
+            
             prevTime = time;
 
+            // Renderizado
             if (renderer && scene && camera) {
                 renderer.render(scene, camera);
             }
         }
 
-        // --- ELIMINADO: updateCollectButtonUI ---
+        // --- REQ: Nueva función para manejar la UI de recolección ---
+        // REQ: Renombrada y simplificada. Solo actualiza el texto del botón.
+        /* ELIMINADO: Ya no es necesario
+        function updateCollectButtonUI(delta) {
+            // ...
+        }
+        */
+        // --- FIN REQ ---
 
-        // MODIFICADO: Inicia el flujo del lobby
-        window.onload = setupFirebase;
+        // MODIFICADO: Iniciar el juego usando la nueva función
+        window.onload = initializeGame;
 
     </script>
 </body>
