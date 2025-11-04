@@ -705,7 +705,7 @@
         const CHARACTER_WEIGHTS = { 
             "Retolam": 0.5, 
             "Shrek": 0.15, /* MODIFICADO: 0.3 -> 0.15 (Más raro) */
-            "Chuck Norris": 0.05, /* MODIFICADO: 0.2 -> 0.05 (El más raro) */ 
+            "Chuck Norris": 0.2, 
             "Obamium": 1.0,
             // --- NUEVOS PESOS (RARITY) ---
             "Hombre Pie": 0.4, /* MODIFICADO: 0.15 -> 0.4 (Más común) */
@@ -713,10 +713,8 @@
             "Coraje Berenjena": 0.3, // Menos raro que BB, más raro que JH
             "JH de la cruz": 0.4, // Menos raro que CB
             // --- NUEVO PERSONAJE DIOS ---
-            "knee surgery": 0.1, // El Dios más raro
+            "knee surgery": 0.1 // El Dios más raro
             // --- FIN NUEVO PERSONAJE DIOS ---
-            // --- NUEVOS PERSONAJES (AÑADIDOS POR USUARIO) ---
-            "don pollo": 0.1, // NUEVO: Añadido al pool general con baja prob
             // --- FIN NUEVOS PESOS ---
         };
         const CHARACTER_DATA = [
@@ -762,9 +760,7 @@
             { name: "Hombre Pie", cost: 3500000000, dps: 30000000, rarity: "Secreto", modelFile: "hombre-pie.glb" },
             // --- FIN NUEVOS PERSONAJES ---
 
-            // --- PERSONAJES (ADMIN BLOCK) ---
-            // MODIFICADO: Eliminados del spawn general
-            /*
+            // --- NUEVOS PERSONAJES (ADMIN BLOCK) ---
             { name: "Baby Goblin cucumber", cost: 4500000, dps: 13500, rarity: "Mitico", modelFile: "Baby Goblin cucumber.glb" },
             { name: "Finx humilde", cost: 17500000, dps: 85000, rarity: "God", modelFile: "finx humilde.glb" },
             { name: "Mohawk mark", cost: 42500000, dps: 220000, rarity: "God", modelFile: "mohawk mark.glb" },
@@ -773,10 +769,8 @@
             { name: "homo y barto", cost: 75000000, dps: 410000, rarity: "Secreto", modelFile: "homo y barto.glb" },
             { name: "canaima", cost: 120000000, dps: 550000, rarity: "Secreto", modelFile: "canaima.glb" },
             { name: "larin", cost: 1200000000, dps: 7500000, rarity: "Secreto", modelFile: "larin.glb" },
-            */
-            // MODIFICADO: "don pollo" se queda, pero su peso está en CHARACTER_WEIGHTS
             { name: "don pollo", cost: 2000000000, dps: 15000000, rarity: "Secreto", modelFile: "don pollo.glb" }
-            // --- FIN PERSONAJES ---
+            // --- FIN NUEVOS PERSONAJES ---
         ];
 
         const CHARACTERS_BY_RARITY = {};
@@ -2863,7 +2857,6 @@
     </script>
 </body>
 </html>
-
 
 
 
